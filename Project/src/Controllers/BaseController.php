@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Core\RequestInfo;
 abstract class BaseController {
-    public abstract function index(RequestInfo $request);
+    public function __construct(private RequestInfo $request) {}
+    public abstract function index();
 }
