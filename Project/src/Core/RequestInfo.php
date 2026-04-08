@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Core;
 class RequestInfo {
     public $method;
     public $path;
