@@ -5,10 +5,10 @@ namespace App\Core;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 use Dotenv\Exception\ValidationException;
-// Импортируем твои кастомные исключения
-use App\Exceptions\ConfigNotFoundException;
-use App\Exceptions\ConfigParamMissingException;
-use App\Exceptions\InternalConfigException;
+
+use App\Exceptions\Config\ConfigNotFoundException;
+use App\Exceptions\Config\ConfigParamMissingException;
+use App\Exceptions\Config\InternalConfigException;
 
 class Config
 {
