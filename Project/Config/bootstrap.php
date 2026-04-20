@@ -5,6 +5,9 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use App\Core\Logger;
 use App\Core\Config;
 
+//загрузка конфигурации
+Config::load(__DIR__ . '/../');
+
 set_exception_handler(function ($exception) {
     Logger::getInstance()->critical("Необработанное исключение: " . $exception->getMessage(), [
         'file' => $exception->getFile(),
@@ -30,6 +33,3 @@ set_exception_handler(function ($exception) {
     }
     exit;
 });
-
-//загрузка конфигурации
-Config::load(__DIR__ . '/../');
