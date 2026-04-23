@@ -2,34 +2,35 @@
 
 namespace App\Core;
 
-use App\Controllers;
 use ReflectionClass;
-
+use App\Core\DIContainer;
 class Router {
     private static $routes = [];
-    public function __construct() {}
+    // private DIContainer $container = new DIContainer();
+    public function __construct(private ?DIContainer $container = null) {
+        $container = ($container) ?? new DIContainer();
+    }
 
     public function register(array $controllers) {
         
-    foreach($controllers as $controller) {
+    foreach($controllers as $controllerName) {
 
-        $reflector = new ReflectionClass($controller::class);
+        $reflector = new ReflectionClass($controllerName);
 
         $methods = $reflector->getMethods();
 
         foreach ($methods as $method) {
 
-            $attributes = $method->getAttributes(Route::class);
+            $route = $method->getAttributes(Route::class)[0]->newInstance();
+        
+            $httpMethods = $route->httpMethods;
+            $path = $route->path;
+            
+            foreach($httpMethods as $httpMethod) {
 
-            foreach($attributes as $attribure) {
-
-                $route = $attribure->getInstance();
-                $httpMethod = $route->httpMethod;
-                $path = $route->path;
-
-                $this->routes[strtoupper($httpMethod)][$path] = [
-                    'controller' => $controller,
-                    'method' => $method,
+                self::$routes[strtoupper($httpMethod)][$path] = [
+                    'controller' => $controllerName,
+                    'method' => $method->getName(),
                 ];
                 }
             }
@@ -43,7 +44,7 @@ class Router {
 
         try {
             $route = $this->getRoute($path, $httpMethod);
-            
+
             $controllerName = "App\\Controllers\\" . $route['controller'];
             $controller = new $controllerName();
 

@@ -7,7 +7,8 @@ use App\Core\RequestInfo;
 abstract class FoodController extends BaseController {
     private IFoodService $foodService;
     //TODO DI Container with services
-    public function __construct(private RequestInfo $request) {}
+    private RequestInfo $request;
+    public function __construct() {}
     public function index() {
 
     }
