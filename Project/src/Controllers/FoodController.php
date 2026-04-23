@@ -4,11 +4,8 @@ namespace App\Controllers;
 
 use App\Core\RequestInfo;
 
-abstract class FoodController extends BaseController {
-    private IFoodService $foodService;
+class FoodController extends BaseController {
     //TODO DI Container with services
     public function __construct(private RequestInfo $request) {}
-    public function index() {
-
-    }
+    public function index() {}
 }
