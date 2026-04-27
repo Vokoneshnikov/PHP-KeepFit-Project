@@ -2,6 +2,6 @@
 
 namespace App\Services;
 
-interface IFoodService {
+class DiaryService {
     
 }

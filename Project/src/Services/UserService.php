@@ -2,6 +2,6 @@
 
 namespace App\Services;
 
-class FoodService {
+class UserService {
     
 }
