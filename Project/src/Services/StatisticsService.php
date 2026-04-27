@@ -2,6 +2,6 @@
 
 namespace App\Services;
 
-interface IProfileService {
+class StatisticsService {
     
 }
