@@ -2,10 +2,19 @@
 namespace App\Core;
 
 class DIContainer {
+    private array $instances = [];
     public function __construct() {}
     public function get($className) {
 
+        if (isset($this->instances[$className])) {
+            return $this->instances[$className];
+        }
+
         $reflector = new \ReflectionClass($className);
+
+        if (!$reflector->isInstantiable()) {
+            throw new \Exception("Класс {$className} не может быть создан.");
+        }
 
         $constructor = $reflector->getConstructor();
 
@@ -25,11 +34,14 @@ class DIContainer {
                 $necessaryParams[] = $this->get($paramName);
             }
             else {
-                throw new \Exception("Параметр без типа или типа значения");
+                throw new \Exception("Параметр {$param->getName()} в {$className} без типа или примитив.");
             }
         
         }
-        return $reflector->newInstanceArgs($necessaryParams);
+        $instance = $reflector->newInstanceArgs($necessaryParams);
+        $this->instances[$className] = $instance;
+
+        return $instance;
 
     }
 }
