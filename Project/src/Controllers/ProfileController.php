@@ -2,8 +2,11 @@
 
 namespace App\Controllers;
 
-use App\Services\UserService;
 use App\Core\Route;
+use App\Services\UserService;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use GuzzleHttp\Psr7\Response;
 
 class ProfileController
 {
@@ -13,35 +16,32 @@ class ProfileController
     }
 
     #[Route('/profile', ['GET'])]
-    public function index()
+    public function index(ServerRequestInterface $request): ResponseInterface
     {
-        echo "Контроллер: Profile, Метод: index";
+        return new Response(200, [], "Контроллер: Profile, Метод: index");
     }
+
     #[Route('/profile/edit', ['GET'])]
-    public function editProfileInfo()
+    public function editProfileInfo(ServerRequestInterface $request): ResponseInterface
     {
-        echo "Контроллер: Profile, Метод: editProfileInfo";
+        return new Response(200, [], "Контроллер: Profile, Метод: editProfileInfo");
     }
+
     #[Route('/profile/edit', ['POST'])]
-    public function updateProfileInfo()
+    public function updateProfileInfo(ServerRequestInterface $request): ResponseInterface
     {
-        echo "Контроллер: Profile, Метод: updateProfileInfo";
+        return new Response(200, [], "Контроллер: Profile, Метод: updateProfileInfo");
     }
+
     #[Route('/profile/recalculate', ['GET'])]
-    public function editRecalculationInfo()
+    public function editRecalculationInfo(ServerRequestInterface $request): ResponseInterface
     {
-        echo "Контроллер: Profile, Метод: editRecalculationInfo";
+        return new Response(200, [], "Контроллер: Profile, Метод: editRecalculationInfo");
     }
+
     #[Route('/profile/recalculate', ['POST'])]
-    public function recalculate()
+    public function recalculate(ServerRequestInterface $request): ResponseInterface
     {
-        echo "Контроллер: Profile, Метод: recalculate";
+        return new Response(200, [], "Контроллер: Profile, Метод: recalculate");
     }
 }
-
-// ProfileController:
-// GET /profile - получение страницы профиля
-// GET /profile/edit - получение формы на редактирования информации о профиле
-// POST /profile/edit - отправка формы
-// GET /profile/recalculate - получение формы на пересчет нормы КБЖУ
-// POST /profile/recalculate - отправка формы

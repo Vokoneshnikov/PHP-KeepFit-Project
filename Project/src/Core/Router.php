@@ -2,7 +2,10 @@
 
 namespace App\Core;
 
+use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
+use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Psr7\Response;
 
 class Router
 {
@@ -48,11 +51,10 @@ class Router
         }
     }
 
-    public function run()
+    public function run(ServerRequestInterface $request): ResponseInterface
     {
-        $requestInfo = new requestInfo();
-        $httpMethod = strtoupper($requestInfo->method);
-        $path = parse_url($requestInfo->path, PHP_URL_PATH);
+        $httpMethod = strtoupper($request->getMethod());
+        $path = $request->getUri()->getPath();
 
         $routesForHttpMethod = self::$routes[$httpMethod] ?? [];
 
@@ -63,17 +65,16 @@ class Router
                     $controller = $this->container->get($handler['controller']);
                     $method = $handler['method'];
 
-                    return call_user_func_array([$controller, $method], $params);
+                    return call_user_func_array([$controller, $method], [$request, ...$params]);
                 } catch (\Exception $e) {
-                    return $this->sendNotFound();
+                    return $this->generateNotFoundResponse();
                 }
             }
         }
-        return $this->sendNotFound();
+        return $this->generateNotFoundResponse();
     }
-    private function sendNotFound(): void
+    private function generateNotFoundResponse(): ResponseInterface
     {
-        header("HTTP/1.0 404 Not Found");
-        echo "404 - Страница не найдена";
+        return new Response(404, [], "404 - Страница не найдена");
     }
 }

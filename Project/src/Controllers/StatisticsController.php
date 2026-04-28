@@ -2,8 +2,11 @@
 
 namespace App\Controllers;
 
-use App\Services\StatisticsService;
 use App\Core\Route;
+use App\Services\StatisticsService;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use GuzzleHttp\Psr7\Response;
 
 class StatisticsController
 {
@@ -13,17 +16,14 @@ class StatisticsController
     }
 
     #[Route('/stats/weekly', ['GET'])]
-    public function showWeeklyStats()
+    public function showWeeklyStats(ServerRequestInterface $request): ResponseInterface
     {
-        echo "Контроллер: Statistics, Метод: showWeeklyStats";
+        return new Response(200, [], "Контроллер: Statistics, Метод: showWeeklyStats");
     }
+
     #[Route('/stats/monthly', ['GET'])]
-    public function showMonthlyStats()
+    public function showMonthlyStats(ServerRequestInterface $request): ResponseInterface
     {
-        echo "Контроллер: Statistics, Метод: showMonthlyStats";
+        return new Response(200, [], "Контроллер: Statistics, Метод: showMonthlyStats");
     }
 }
-
-// StatisticsController:
-// GET /stats/weekly - получение статистики за неделю
-// GET /stats/monthly - получение статистики за месяц

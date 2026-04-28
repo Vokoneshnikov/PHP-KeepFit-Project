@@ -2,8 +2,11 @@
 
 namespace App\Controllers;
 
-use App\Services\FoodService;
 use App\Core\Route;
+use App\Services\FoodService;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use GuzzleHttp\Psr7\Response;
 
 class FoodController
 {
@@ -13,46 +16,46 @@ class FoodController
     }
 
     #[Route('/food', ['GET'])]
-    public function getSearchMainPage()
+    public function getSearchMainPage(ServerRequestInterface $request): ResponseInterface
     {
-        echo "Контроллер: Food, Метод: getSearchMainPage";
+        return new Response(200, [], "Контроллер: Food, Метод: getSearchMainPage");
     }
+
     #[Route('/food/{foodId}', ['GET'])]
-    public function getProductPage(int $foodId)
+    public function getProductPage(ServerRequestInterface $request, string $foodId): ResponseInterface
     {
-        echo "Контроллер: Food, Метод: getProductPage";
+        return new Response(200, [], "Контроллер: Food, Метод: getProductPage, ID: " . $foodId);
     }
+
     #[Route('/food/{foodId}', ['POST'])]
-    public function addProduct(int $foodId)
+    public function addProduct(ServerRequestInterface $request, string $foodId): ResponseInterface
     {
-        echo "Контроллер: Food, Метод: addProduct";
+        // Для POST обычно возвращаем редирект или 201
+        return new Response(201, [], "Контроллер: Food, Метод: addProduct, ID: " . $foodId);
     }
+
     #[Route('/food/search', ['GET'])]
-    public function getSearchResults()
+    public function getSearchResults(ServerRequestInterface $request): ResponseInterface
     {
-        echo "Контроллер: Food, Метод: getSearchResults";
+        $query = $request->getQueryParams()['q'] ?? '';
+        return new Response(200, [], "Контроллер: Food, Метод: getSearchResults, Поиск: " . $query);
     }
+
     #[Route('/food/recent', ['GET'])]
-    public function getRecentFood()
+    public function getRecentFood(ServerRequestInterface $request): ResponseInterface
     {
-        echo "Контроллер: Food, Метод: getRecentFood";
+        return new Response(200, [], "Контроллер: Food, Метод: getRecentFood");
     }
+
     #[Route('/food/add', ['GET'])]
-    public function getCreateForm()
+    public function getCreateForm(ServerRequestInterface $request): ResponseInterface
     {
-        echo "Контроллер: Food, Метод: getCreateForm";
+        return new Response(200, [], "Контроллер: Food, Метод: getCreateForm");
     }
+
     #[Route('/food/add', ['POST'])]
-    public function storeProduct()
+    public function storeProduct(ServerRequestInterface $request): ResponseInterface
     {
-        echo "Контроллер: Food, Метод: storeProduct";
+        return new Response(201, [], "Контроллер: Food, Метод: storeProduct");
     }
 }
-
-// FoodController:
-// GET /food?id={id} - получение страницы конкретного продукта для его добавления в рацион
-// POST /food?id={id} - добавление продукта в рацион
-// GET /food/search - получение списка пищи по ключевому слову
-// GET /food/recent - получение списка недавней пищи
-// GET /food/add - получение формы для добавления нового рецепта
-// POST /food/add - отправка данных из формы
