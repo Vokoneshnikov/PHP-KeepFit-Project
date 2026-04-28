@@ -2,7 +2,8 @@
 
 namespace App\Dtos\Requests;
 
-class CreateFoodRequest {
+class CreateFoodRequest
+{
     public function __construct(
         public string $name,
         public int $calories,
@@ -10,5 +11,6 @@ class CreateFoodRequest {
         public int $fats,
         public int $carbs,
         public ?int $createdBy = null,
-    ) {}
+    ) {
+    }
 }

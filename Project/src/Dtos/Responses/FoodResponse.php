@@ -2,7 +2,8 @@
 
 namespace App\Dtos\Responses;
 
-class FoodResponse {
+class FoodResponse
+{
     public function __construct(
         public int $id,
         public string $name,
@@ -11,5 +12,6 @@ class FoodResponse {
         public int $fats,
         public int $carbs,
         public ?int $createdBy = null,
-    ) {}
+    ) {
+    }
 }

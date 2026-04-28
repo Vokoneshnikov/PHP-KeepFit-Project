@@ -1,9 +1,10 @@
 <?php
-//Базовый CRUD
-namespace App\Repositories\interfaces;
-interface IRepository {
 
-    
+//Базовый CRUD
+namespace App\Repositories\Interfaces;
+
+interface IRepository
+{
     public function getById(int $id);
     public function getAll();
 
