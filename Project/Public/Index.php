@@ -1,17 +1,12 @@
 <?php
 
 require_once __DIR__ . '/../config/bootstrap.php';
-// use App\Core\Route;
-// use App\Repositories\Implementations\UserRepository;
-// use App\Dtos\Responses\UserResponse;
+
 use App\Core\Router;
+use GuzzleHttp\Psr7\ServerRequest;
 
-// $rep = new UserRepository();
-// $users = $rep->getAll();
+$request = ServerRequest::fromGlobals();
 
-// foreach($users as $user) {
-//     echo $user->name . "<br/>";
-// }
 $router = new Router();
 $router->register([
     \App\Controllers\DiaryController::class,
@@ -20,5 +15,14 @@ $router->register([
     \App\Controllers\MealController::class,
     \App\Controllers\ProfileController::class,
     \App\Controllers\StatisticsController::class,
-    ]);
-$router->run();
+]);
+$response = $router->run($request);
+
+http_response_code($response->getStatusCode());
+
+foreach ($response->getHeaders() as $name => $values) {
+    foreach ($values as $value) {
+        header(sprintf('%s: %s', $name, $value), false);
+    }
+}
+echo $response->getBody();
