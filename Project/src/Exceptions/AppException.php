@@ -2,10 +2,11 @@
 
 namespace App\Exceptions;
 
-class AppException extends \Exception {
+class AppException extends \Exception
+{
     protected int $statusCode = 500;
 
-    public function getHttpCode(): int 
+    public function getHttpCode(): int
     {
         return $this->statusCode;
     }

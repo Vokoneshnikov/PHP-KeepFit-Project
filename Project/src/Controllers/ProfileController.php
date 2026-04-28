@@ -4,29 +4,37 @@ namespace App\Controllers;
 
 use App\Services\UserService;
 use App\Core\Route;
-class ProfileController {
+
+class ProfileController
+{
     public function __construct(
         // private UserService $userService,
-    ) {}
+    ) {
+    }
 
     #[Route('/profile', ['GET'])]
-    public function index() {
+    public function index()
+    {
         echo "Контроллер: Profile, Метод: index";
     }
-    #[Route('/profile/edit',  ['GET'])]
-    public function editProfileInfo() {
+    #[Route('/profile/edit', ['GET'])]
+    public function editProfileInfo()
+    {
         echo "Контроллер: Profile, Метод: editProfileInfo";
     }
-    #[Route('/profile/edit',  ['POST'])]
-    public function updateProfileInfo() {
+    #[Route('/profile/edit', ['POST'])]
+    public function updateProfileInfo()
+    {
         echo "Контроллер: Profile, Метод: updateProfileInfo";
     }
-    #[Route('/profile/recalculate',  ['GET'])]
-    public function editRecalculationInfo() {
+    #[Route('/profile/recalculate', ['GET'])]
+    public function editRecalculationInfo()
+    {
         echo "Контроллер: Profile, Метод: editRecalculationInfo";
     }
-    #[Route('/profile/recalculate',  ['POST'])]
-    public function recalculate() {
+    #[Route('/profile/recalculate', ['POST'])]
+    public function recalculate()
+    {
         echo "Контроллер: Profile, Метод: recalculate";
     }
 }

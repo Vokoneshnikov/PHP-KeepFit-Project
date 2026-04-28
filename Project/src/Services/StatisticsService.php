@@ -2,6 +2,6 @@
 
 namespace App\Services;
 
-class StatisticsService {
-    
+class StatisticsService
+{
 }

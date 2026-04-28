@@ -1,10 +1,15 @@
 <?php
+
 namespace App\Core;
 
-class DIContainer {
+class DIContainer
+{
     private array $instances = [];
-    public function __construct() {}
-    public function get($className) {
+    public function __construct()
+    {
+    }
+    public function get($className)
+    {
 
         if (isset($this->instances[$className])) {
             return $this->instances[$className];
@@ -26,22 +31,19 @@ class DIContainer {
 
         $necessaryParams = [];
 
-        foreach($constructorParams as $param) {
+        foreach ($constructorParams as $param) {
             $type = $param->getType();
 
             if ($type && (!$type->isBuiltin())) {
                 $paramName = $type->getName();
                 $necessaryParams[] = $this->get($paramName);
-            }
-            else {
+            } else {
                 throw new \Exception("Параметр {$param->getName()} в {$className} без типа или примитив.");
             }
-        
         }
         $instance = $reflector->newInstanceArgs($necessaryParams);
         $this->instances[$className] = $instance;
 
         return $instance;
-
     }
 }

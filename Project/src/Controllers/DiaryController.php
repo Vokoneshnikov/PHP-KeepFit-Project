@@ -5,12 +5,15 @@ namespace App\Controllers;
 use App\Services\DiaryService;
 use App\Core\Route;
 
-class DiaryController {
+class DiaryController
+{
     public function __construct(
         // private DiaryService $diaryService,
-    ) {}
+    ) {
+    }
     #[Route('/diary', ['GET'])]
-    public function index() {
+    public function index()
+    {
         echo "Контроллер: Diary, Метод: index. Дата: " . ($_GET['date'] ?? 'не указана');
     }
 }

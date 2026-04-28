@@ -1,11 +1,10 @@
 <?php
-namespace App\Middlewares;
 
+namespace App\Middlewares;
 
 use App\Core\RequestInfo;
 
-interface IMiddleware {
-
-public function handle(RequestInfo $request, ?IMiddleware $next);
-
+interface IMiddleware
+{
+    public function handle(RequestInfo $request, ?IMiddleware $next);
 }

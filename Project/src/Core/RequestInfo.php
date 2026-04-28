@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Core;
-class RequestInfo {
+
+class RequestInfo
+{
     public $method;
     public $path;
     public $get;
@@ -9,7 +11,8 @@ class RequestInfo {
     public $session;
     private $attributes = [];
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->method = $_SERVER['REQUEST_METHOD'];
         $this->path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $this->get = $_GET;
@@ -18,13 +21,13 @@ class RequestInfo {
     }
 
 
-    public function setAttribute($key, $value) {
+    public function setAttribute($key, $value)
+    {
         $this->attributes[$key] = $value;
     }
-    
-    public function getAttribute($key, $default = null) {
+
+    public function getAttribute($key, $default = null)
+    {
         return $this->attributes[$key] ?? $default;
     }
 }
-
-?>

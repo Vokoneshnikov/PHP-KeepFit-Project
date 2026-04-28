@@ -1,6 +1,7 @@
 <?php
-namespace App\Repositories\interfaces;
 
-interface IFoodRepository extends IRepository {
-    
+namespace App\Repositories\Interfaces;
+
+interface IFoodRepository extends IRepository
+{
 }
