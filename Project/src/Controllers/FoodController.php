@@ -10,11 +10,15 @@ class FoodController {
     ) {}
 
     #[Route('/food', ['GET'])]
-    public function getProductPage() {
+    public function getSearchMainPage() {
+        echo "Контроллер: Food, Метод: getSearchMainPage";
+    }
+    #[Route('/food/{foodId}', ['GET'])]
+    public function getProductPage(int $foodId) {
         echo "Контроллер: Food, Метод: getProductPage";
     }
-    #[Route('/food',  ['POST'])]
-    public function addProduct() {
+    #[Route('/food/{foodId}',  ['POST'])]
+    public function addProduct(int $foodId) {
         echo "Контроллер: Food, Метод: addProduct";
     }
     #[Route('/food/search',  ['GET'])]

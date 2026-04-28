@@ -9,16 +9,16 @@ class MealController {
         // private MealService $mealService,
     ) {}
 
-    #[Route('/meals', ['GET'])]
-    public function getProductInfo() {
+    #[Route('/meals/{mealId}', ['GET'])]
+    public function getProductInfo(int $mealId) {
         echo "Контроллер: Meal, Метод: getProductInfo";
     }
-    #[Route('/meals',  ['POST'])]
-    public function updateProductInfo() {
+    #[Route('/meals/{mealId}',  ['POST'])]
+    public function updateProductInfo(int $mealId) {
         echo "Контроллер: Meal, Метод: updateProductInfo";
     }
-    #[Route('/meals',  ['DELETE'])]
-    public function deleteProduct() {
+    #[Route('/meals/{mealId}',  ['DELETE'])]
+    public function deleteProduct(int $mealId) {
         echo "Контроллер: Meal, Метод: deleteProduct";
     }
 }

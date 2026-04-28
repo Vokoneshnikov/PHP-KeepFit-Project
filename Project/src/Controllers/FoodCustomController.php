@@ -14,16 +14,16 @@ class FoodCustomController {
         echo "Контроллер: FoodCustom, Метод: getCustomRecipes";
     }
     //ДОЛЖНО БЫТЬ /food/custom/{id} - но это когда добавлю маски
-    #[Route('/food/custom/detail',  ['GET'])]
-    public function getRecipe() {
+    #[Route('/food/custom/{foodId}',  ['GET'])]
+    public function getRecipe(int $foodId) {
         echo "Контроллер: FoodCustom, Метод: getRecipe";
     }
-    #[Route('/food/custom',  ['POST'])]
-    public function updateRecipe() {
+    #[Route('/food/custom/{foodId}',  ['POST'])]
+    public function updateRecipe(int $foodId) {
         echo "Контроллер: FoodCustom, Метод: updateRecipe";
     }
-    #[Route('/food/custom', ['DELETE'])]
-    public function deleteRecipe() {
+    #[Route('/food/custom/{foodId}', ['DELETE'])]
+    public function deleteRecipe(int $foodId) {
         echo "Контроллер: FoodCustom, Метод: deleteRecipe";
     }
 
