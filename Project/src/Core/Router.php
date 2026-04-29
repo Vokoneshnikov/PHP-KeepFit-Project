@@ -3,6 +3,7 @@
 namespace App\Core;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use ReflectionClass;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Psr7\Response;
@@ -10,11 +11,17 @@ use GuzzleHttp\Psr7\Response;
 class Router
 {
     private static $routes = [];
+    private array $middlewares = [];
     private DIContainer $container;
 
     public function __construct(?DIContainer $container = null)
     {
         $this->container = $container ?? new DIContainer();
+    }
+
+    public function addMiddleware(MiddlewareInterface $middleware)
+    {
+        $this->middlewares[] = $middleware;
     }
 
     public function register(array $controllers): void
@@ -61,11 +68,11 @@ class Router
         foreach ($routesForHttpMethod as $pattern => $handler) {
             if (preg_match($pattern, $path, $matches)) {
                 $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
-                try {
-                    $controller = $this->container->get($handler['controller']);
-                    $method = $handler['method'];
+                $fallbackHandler = fn(ServerRequestInterface $req) => $this->callController($req, $handler, $params);
 
-                    return call_user_func_array([$controller, $method], [$request, ...$params]);
+                $requestHandler = new RequestHandler($this->middlewares, $fallbackHandler);
+                try {
+                    return $requestHandler->handle($request);
                 } catch (\Exception $e) {
                     return $this->generateNotFoundResponse();
                 }
@@ -73,6 +80,15 @@ class Router
         }
         return $this->generateNotFoundResponse();
     }
+
+    private function callController(ServerRequestInterface $request, array $handler, array $params): ResponseInterface
+    {
+        $controller = $this->container->get($handler['controller']);
+        $method = $handler['method'];
+
+        return call_user_func_array([$controller, $method], [$request, ...$params]);
+    }
+
     private function generateNotFoundResponse(): ResponseInterface
     {
         return new Response(404, [], "404 - Страница не найдена");

@@ -4,18 +4,14 @@ namespace App\Core;
 
 use Monolog\Logger as MonologLogger;
 use Monolog\Handler\StreamHandler;
-
-class Logger
+use Psr\Log\LoggerInterface;
+class LoggerFactory
 {
-    private static $logger = null;
-
-    public static function getInstance(): MonologLogger
+    public static function create(): LoggerInterface
     {
-        if (self::$logger == null) {
-            $logger = new MonologLogger("logger-app");
-            $logger->pushHandler(new StreamHandler(__DIR__ . "/../..logs/app.log", MonologLogger::DEBUG));
-            self::$logger = $logger;
-        }
-        return self::$logger;
+        $logger = new MonologLogger("logger-app");
+        $logPath = __DIR__ . "/../../Logs/app.log";
+        $logger->pushHandler(new StreamHandler($logPath, MonologLogger::DEBUG));
+        return $logger;
     }
 }
