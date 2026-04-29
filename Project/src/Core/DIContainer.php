@@ -5,12 +5,12 @@ namespace App\Core;
 class DIContainer
 {
     private array $instances = [];
-    public function __construct()
+    public function set(string $id, $instance): void
     {
+        $this->instances[$id] = $instance;
     }
     public function get($className)
     {
-
         if (isset($this->instances[$className])) {
             return $this->instances[$className];
         }
@@ -24,24 +24,23 @@ class DIContainer
         $constructor = $reflector->getConstructor();
 
         if ($constructor === null) {
-            return new $className();
-        }
+            $instance = new $className();
+        } else {
+            $constructorParams = $constructor->getParameters();
+            $necessaryParams = [];
 
-        $constructorParams = $constructor->getParameters();
+            foreach ($constructorParams as $param) {
+                $type = $param->getType();
 
-        $necessaryParams = [];
-
-        foreach ($constructorParams as $param) {
-            $type = $param->getType();
-
-            if ($type && (!$type->isBuiltin())) {
-                $paramName = $type->getName();
-                $necessaryParams[] = $this->get($paramName);
-            } else {
-                throw new \Exception("Параметр {$param->getName()} в {$className} без типа или примитив.");
+                if ($type && (!$type->isBuiltin())) {
+                    $paramName = $type->getName();
+                    $necessaryParams[] = $this->get($paramName);
+                } else {
+                    throw new \Exception("Параметр {$param->getName()} в {$className} без типа или примитив.");
+                }
             }
+            $instance = $reflector->newInstanceArgs($necessaryParams);
         }
-        $instance = $reflector->newInstanceArgs($necessaryParams);
         $this->instances[$className] = $instance;
 
         return $instance;
