@@ -24,6 +24,8 @@ class Router
         $this->middlewares[] = $middleware;
     }
 
+    //TODO добавить сортировки роутов, чтобы сначала статика, потом маски -
+    // сейчас просто перекрываю порядком в контроллерах
     public function register(array $controllers): void
     {
 

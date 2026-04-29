@@ -21,19 +21,6 @@ class FoodController
         return new Response(200, [], "Контроллер: Food, Метод: getSearchMainPage");
     }
 
-    #[Route('/food/{foodId}', ['GET'])]
-    public function getProductPage(ServerRequestInterface $request, string $foodId): ResponseInterface
-    {
-        return new Response(200, [], "Контроллер: Food, Метод: getProductPage, ID: " . $foodId);
-    }
-
-    #[Route('/food/{foodId}', ['POST'])]
-    public function addProduct(ServerRequestInterface $request, string $foodId): ResponseInterface
-    {
-        // Для POST обычно возвращаем редирект или 201
-        return new Response(201, [], "Контроллер: Food, Метод: addProduct, ID: " . $foodId);
-    }
-
     #[Route('/food/search', ['GET'])]
     public function getSearchResults(ServerRequestInterface $request): ResponseInterface
     {
@@ -57,5 +44,19 @@ class FoodController
     public function storeProduct(ServerRequestInterface $request): ResponseInterface
     {
         return new Response(201, [], "Контроллер: Food, Метод: storeProduct");
+    }
+
+    /* Динамические роуты в конце, чтобы не перехватывать статику */
+
+    #[Route('/food/{foodId}', ['GET'])]
+    public function getProductPage(ServerRequestInterface $request, string $foodId): ResponseInterface
+    {
+        return new Response(200, [], "Контроллер: Food, Метод: getProductPage, ID: " . $foodId);
+    }
+
+    #[Route('/food/{foodId}', ['POST'])]
+    public function addProduct(ServerRequestInterface $request, string $foodId): ResponseInterface
+    {
+        return new Response(201, [], "Контроллер: Food, Метод: addProduct, ID: " . $foodId);
     }
 }
