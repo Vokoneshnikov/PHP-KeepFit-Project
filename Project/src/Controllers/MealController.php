@@ -2,8 +2,11 @@
 
 namespace App\Controllers;
 
-use App\Services\MealService;
 use App\Core\Route;
+use App\Services\MealService;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use GuzzleHttp\Psr7\Response;
 
 class MealController
 {
@@ -13,23 +16,20 @@ class MealController
     }
 
     #[Route('/meals/{mealId}', ['GET'])]
-    public function getProductInfo(int $mealId)
+    public function getProductInfo(ServerRequestInterface $request, string $mealId): ResponseInterface
     {
-        echo "Контроллер: Meal, Метод: getProductInfo";
+        return new Response(200, [], "Контроллер: Meal, Метод: getProductInfo, ID: " . $mealId);
     }
+
     #[Route('/meals/{mealId}', ['POST'])]
-    public function updateProductInfo(int $mealId)
+    public function updateProductInfo(ServerRequestInterface $request, string $mealId): ResponseInterface
     {
-        echo "Контроллер: Meal, Метод: updateProductInfo";
+        return new Response(200, [], "Контроллер: Meal, Метод: updateProductInfo, ID: " . $mealId);
     }
+
     #[Route('/meals/{mealId}', ['DELETE'])]
-    public function deleteProduct(int $mealId)
+    public function deleteProduct(ServerRequestInterface $request, string $mealId): ResponseInterface
     {
-        echo "Контроллер: Meal, Метод: deleteProduct";
+        return new Response(200, [], "Контроллер: Meal, Метод: deleteProduct, ID: " . $mealId);
     }
 }
-
-// MealController:
-// GET /meals?id={id} - получение страницы конкретного продукта
-// POST /meals?id={id} - обновление граммовки/рациона
-// DELETE /meals?id={id} - удаление пищи из приема пищи
