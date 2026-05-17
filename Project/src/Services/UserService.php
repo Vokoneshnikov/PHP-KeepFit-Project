@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Dtos\Requests\UpdateUserRequest;
 use App\Repositories\Interfaces\IUserRepository;
 use App\Dtos\Requests\CreateUserRequest;
 use App\Dtos\Responses\UserResponse;
@@ -44,6 +45,20 @@ class UserService
         }
 
         return $this->userRepository->findByEmail($email);
+    }
+    public function updateProfile(UpdateUserRequest $request): UserResponse
+    {
+        if ($request->email !== null && !filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException("Некорректный формат email");
+        }
+
+        if ($request->email !== null) {
+            $existingUser = $this->userRepository->findByEmail($request->email);
+            if ($existingUser !== null && $existingUser->id !== $request->id) {
+                throw new \InvalidArgumentException("Этот email уже занят другим пользователем");
+            }
+        }
+        return $this->userRepository->save($request);
     }
     public function generateTokens(UserResponse $user): array
     {

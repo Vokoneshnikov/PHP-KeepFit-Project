@@ -68,7 +68,7 @@ class MealRepository implements IMealRepository
                 foodId: $row['food_id'],
                 amountGrams: $row['amount_grams'],
                 mealType: MealType::from($row['meal_type']),
-                consumedAt: new \DateTimeImmutable($data['consumed_at']),
+                consumedAt: new \DateTimeImmutable($row['consumed_at']),
             ), $data);
 
             return $meals;
@@ -147,12 +147,7 @@ class MealRepository implements IMealRepository
             $stmt = $this->pdo->prepare("UPDATE meals SET " . implode(', ', $updates) . " WHERE id = :id");
             $stmt->execute($params);
 
-            $meal = $this->getById($request->id);
-
-            if (!$meal) {
-                throw new \Exception("Прием пищи не найден.");
-            }
-            return $meal;
+            return $this->getById($request->id);
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом update";
             $this->logger->error($msg, [
