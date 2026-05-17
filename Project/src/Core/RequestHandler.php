@@ -14,7 +14,8 @@ class RequestHandler implements RequestHandlerInterface
     public function __construct(
         private array $middleware,
         private \Closure $fallbackHandler
-    ) {}
+    ) {
+    }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {

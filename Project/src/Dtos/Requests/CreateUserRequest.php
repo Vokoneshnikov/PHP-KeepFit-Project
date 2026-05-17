@@ -8,7 +8,7 @@ use App\Enums\Gender;
 class CreateUserRequest
 {
     public function __construct(
-        public string $passwordHash,
+        public string $password,
         public string $email,
         public string $name,
         public Gender $gender,

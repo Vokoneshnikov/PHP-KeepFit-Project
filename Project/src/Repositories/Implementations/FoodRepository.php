@@ -2,21 +2,24 @@
 
 namespace App\Repositories\Implementations;
 
-use App\Repositories\interfaces\IFoodRepository;
+use App\Repositories\Interfaces\IFoodRepository;
 use App\Dtos\Requests\CreateFoodRequest;
 use App\Dtos\Requests\UpdateFoodRequest;
 use App\Dtos\Responses\FoodResponse;
 use App\Core\Database;
-use App\Core\Logger;
+use Psr\Log\LoggerInterface;
+use App\Core\LoggerFactory;
 use PDOException;
 
 class FoodRepository implements IFoodRepository
 {
     private \PDO $pdo;
+    private LoggerInterface $logger;
 
-    public function __construct(?\PDO $pdo = null)
+    public function __construct(?\PDO $pdo = null, ?LoggerInterface $logger = null)
     {
         $this->pdo = $pdo ?? Database::getConnection();
+        $this->logger = $logger ?? LoggerFactory::create();
     }
 
     public function getById(int $id): FoodResponse
@@ -44,7 +47,10 @@ class FoodRepository implements IFoodRepository
             return $foodDto;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом getById";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -69,7 +75,10 @@ class FoodRepository implements IFoodRepository
             return $foods;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом getAll";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -111,7 +120,10 @@ class FoodRepository implements IFoodRepository
             );
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом create";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -138,7 +150,10 @@ class FoodRepository implements IFoodRepository
             return $food;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом update";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -155,7 +170,10 @@ class FoodRepository implements IFoodRepository
             return ($deletedRows === 0) ? false : true;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом delete";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }

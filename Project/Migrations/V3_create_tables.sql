@@ -11,7 +11,7 @@ CREATE TABLE users (
 CREATE TABLE user_parameters (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    weight DECIMAL(3,2) NOT NULL,
+    weight DECIMAL(5,2) NOT NULL,
     height SMALLINT NOT NULL,
     activity_factor activity_level NOT NULL,
     goal fitness_goal NOT NULL,
@@ -43,6 +43,6 @@ CREATE TABLE meals (
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     food_id INTEGER NOT NULL REFERENCES foods(id) ON DELETE RESTRICT,
     amount_grams INTEGER NOT NULL CHECK (amount_grams > 0),
-    type meal_type NOT NULL,
+    meal_type meal_type NOT NULL,
     consumed_at DATE NOT NULL DEFAULT CURRENT_DATE
 );

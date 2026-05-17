@@ -7,10 +7,10 @@ class UpdateFoodRequest
     public function __construct(
         public int $id,
         public string $name,
-        public int $proteins,
-        public int $fats,
-        public int $carbs,
-        public int $calories,
+        public float $proteins,
+        public float $fats,
+        public float $carbs,
+        public float $calories,
     ) {
     }
 }
