@@ -2,22 +2,25 @@
 
 namespace App\Repositories\Implementations;
 
-use App\Repositories\interfaces\IMealRepository;
+use App\Repositories\Interfaces\IMealRepository;
 use App\Dtos\Requests\CreateMealRequest;
 use App\Dtos\Requests\UpdateMealRequest;
 use App\Dtos\Responses\MealResponse;
 use App\Enums\MealType;
 use App\Core\Database;
-use App\Core\Logger;
+use Psr\Log\LoggerInterface;
+use App\Core\LoggerFactory;
 use PDOException;
 
 class MealRepository implements IMealRepository
 {
     private \PDO $pdo;
+    private LoggerInterface $logger;
 
-    public function __construct(?\PDO $pdo = null)
+    public function __construct(?\PDO $pdo = null, ?LoggerInterface $logger = null)
     {
         $this->pdo = $pdo ?? Database::getConnection();
+        $this->logger = $logger ?? LoggerFactory::create();
     }
 
     public function getById(int $id): MealResponse
@@ -44,7 +47,10 @@ class MealRepository implements IMealRepository
             return $mealDto;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом getById";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -68,7 +74,10 @@ class MealRepository implements IMealRepository
             return $meals;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом getAll";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -108,7 +117,10 @@ class MealRepository implements IMealRepository
             );
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом create";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -143,7 +155,10 @@ class MealRepository implements IMealRepository
             return $meal;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом update";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -160,7 +175,10 @@ class MealRepository implements IMealRepository
             return !(($deletedRows === 0));
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом delete";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }

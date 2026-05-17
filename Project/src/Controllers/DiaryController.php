@@ -7,6 +7,7 @@ use App\Core\Route;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use GuzzleHttp\Psr7\Response;
+
 class DiaryController
 {
     public function __construct(

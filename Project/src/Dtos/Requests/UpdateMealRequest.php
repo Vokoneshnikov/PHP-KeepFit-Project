@@ -9,7 +9,7 @@ class UpdateMealRequest
 {
     public function __construct(
         public int $id,
-        public ?int $amountGrams = null,
+        public ?float $amountGrams = null,
         public ?MealType $mealType = null,
     ) {
     }

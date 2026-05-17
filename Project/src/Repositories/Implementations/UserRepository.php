@@ -4,20 +4,23 @@ namespace App\Repositories\Implementations;
 
 use App\Dtos\Requests\CreateUserRequest;
 use App\Dtos\Requests\UpdateUserRequest;
-use App\Repositories\interfaces\IUserRepository;
+use App\Repositories\Interfaces\IUserRepository;
 use App\Dtos\Responses\UserResponse;
 use App\Enums\Gender;
 use App\Core\Database;
-use App\Core\Logger;
+use Psr\Log\LoggerInterface;
+use App\Core\LoggerFactory;
 use PDOException;
 
 class UserRepository implements IUserRepository
 {
     private \PDO $pdo;
+    private LoggerInterface $logger;
 
-    public function __construct(?\PDO $pdo = null)
+    public function __construct(?\PDO $pdo = null, ?LoggerInterface $logger = null)
     {
         $this->pdo = $pdo ?? Database::getConnection();
+        $this->logger = $logger ?? LoggerFactory::create();
     }
 
     public function getById(int $id): UserResponse
@@ -42,7 +45,10 @@ class UserRepository implements IUserRepository
             return $userDto;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом getById";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -64,7 +70,10 @@ class UserRepository implements IUserRepository
             return $users;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом getAll";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -102,7 +111,10 @@ class UserRepository implements IUserRepository
             );
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом create";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -140,7 +152,10 @@ class UserRepository implements IUserRepository
             return $user;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом update";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -157,7 +172,10 @@ class UserRepository implements IUserRepository
             return ($deletedRows === 0) ? false : true;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом delete";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }

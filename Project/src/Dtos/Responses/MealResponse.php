@@ -11,7 +11,7 @@ class MealResponse
         public int $id,
         public int $userId,
         public int $foodId,
-        public int $amountGrams,
+        public float $amountGrams,
         public MealType $mealType,
         public DateTimeImmutable $consumedAt
     ) {

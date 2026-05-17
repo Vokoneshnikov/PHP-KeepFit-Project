@@ -5,6 +5,7 @@ namespace App\Core;
 use Monolog\Logger as MonologLogger;
 use Monolog\Handler\StreamHandler;
 use Psr\Log\LoggerInterface;
+
 class LoggerFactory
 {
     public static function create(): LoggerInterface
