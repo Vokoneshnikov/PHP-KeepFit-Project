@@ -1,56 +1,66 @@
 <?php
+
 namespace App\Repositories\Implementations;
 
 use App\Dtos\Requests\CreateUserRequest;
 use App\Dtos\Requests\UpdateUserRequest;
-use App\Repositories\interfaces\IUserRepository;
+use App\Repositories\Interfaces\IUserRepository;
 use App\Dtos\Responses\UserResponse;
 use App\Enums\Gender;
 use App\Core\Database;
-use App\Core\Logger;
+use Psr\Log\LoggerInterface;
+use App\Core\LoggerFactory;
 use PDOException;
-class UserRepository implements IUserRepository {
+
+class UserRepository implements IUserRepository
+{
     private \PDO $pdo;
+    private LoggerInterface $logger;
 
-    public function __construct(?\PDO $pdo = null) {
+    public function __construct(?\PDO $pdo = null, ?LoggerInterface $logger = null)
+    {
         $this->pdo = $pdo ?? Database::getConnection();
+        $this->logger = $logger ?? LoggerFactory::create();
     }
 
-    public function getById(int $id) : UserResponse {
+    public function getById(int $id): UserResponse
+    {
         try {
-        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE id = :id");
-        $stmt->execute([
+            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE id = :id");
+            $stmt->execute([
             "id" => $id,
-        ]);
-        $data = $stmt->fetch();
-        if (!$data) {
-            throw new \Exception("Пользователь не найден"); 
-        }
+            ]);
+            $data = $stmt->fetch();
+            if (!$data) {
+                throw new \Exception("Пользователь не найден");
+            }
 
-        $userDto = new UserResponse (
-            id: $data['id'],
-            name: $data['name'],
-            gender: Gender::from($data['gender']),
-            email: $data['email'],
-        );
+            $userDto = new UserResponse(
+                id: $data['id'],
+                name: $data['name'],
+                gender: Gender::from($data['gender']),
+                email: $data['email'],
+            );
 
-        return $userDto;
-        }
-        catch (PDOException $e) {
+            return $userDto;
+        } catch (PDOException $e) {
             $msg = "Ошибка с запросом getById";
-            Logger::getInstance()->error($msg);
-            throw new \Exception($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
 
+            throw new \Exception($msg);
         }
     }
-    public function getAll() : array {
+    public function getAll(): array
+    {
         try {
             $stmt = $this->pdo->prepare("SELECT * FROM users");
             $stmt->execute();
 
             $data = $stmt->fetchAll();
 
-            $users = array_map(fn($row) =>  new UserResponse (
+            $users = array_map(fn($row) =>  new UserResponse(
                 id: $row['id'],
                 name: $row['name'],
                 gender: Gender::from($row['gender']),
@@ -58,17 +68,19 @@ class UserRepository implements IUserRepository {
             ), $data);
 
             return $users;
-        }
-        catch (PDOException $e){
+        } catch (PDOException $e) {
             $msg = "Ошибка с запросом getAll";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
-
     }
 
-    public function save(object $request){
-        return match(true) {
+    public function save(object $request)
+    {
+        return match (true) {
             $request instanceof CreateUserRequest => $this->create($request),
 
             $request instanceof UpdateUserRequest => $this->update($request),
@@ -77,7 +89,8 @@ class UserRepository implements IUserRepository {
         };
     }
 
-    private function create(CreateUserRequest $request) : UserResponse{
+    private function create(CreateUserRequest $request): UserResponse
+    {
         try {
             $stmt = $this->pdo->prepare("INSERT INTO users (name, email, password_hash, gender, birth_date) VALUES (:name, :email, :passwordHash, :gender, :birthDate) RETURNING id");
             $stmt->execute([
@@ -96,15 +109,18 @@ class UserRepository implements IUserRepository {
                 gender: $request->gender,
                 email: $request->email
             );
-        }
-        catch (PDOException $e) {
+        } catch (PDOException $e) {
             $msg = "Ошибка с запросом create";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
 
-    private function update(UpdateUserRequest $request) : UserResponse {
+    private function update(UpdateUserRequest $request): UserResponse
+    {
         $updates = [];
         $params = ['id' => $request->id];
 
@@ -134,15 +150,18 @@ class UserRepository implements IUserRepository {
                 throw new \Exception("Пользователь не найден после обновления.");
             }
             return $user;
-        }
-        catch (PDOException $e) {
+        } catch (PDOException $e) {
             $msg = "Ошибка с запросом update";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
 
-    public function delete(int $id) : bool{
+    public function delete(int $id): bool
+    {
         try {
             $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = :id");
             $stmt->execute([
@@ -151,13 +170,13 @@ class UserRepository implements IUserRepository {
             $deletedRows = $stmt->rowCount();
 
             return ($deletedRows === 0) ? false : true;
-        }
-        catch (PDOException $e) {
+        } catch (PDOException $e) {
             $msg = "Ошибка с запросом delete";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
-
     }
-
 }

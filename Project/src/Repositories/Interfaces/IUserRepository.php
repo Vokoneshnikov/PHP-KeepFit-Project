@@ -1,6 +1,7 @@
 <?php
-namespace App\Repositories\interfaces;
 
-interface IUserRepository extends IRepository {
-    
+namespace App\Repositories\Interfaces;
+
+interface IUserRepository extends IRepository
+{
 }

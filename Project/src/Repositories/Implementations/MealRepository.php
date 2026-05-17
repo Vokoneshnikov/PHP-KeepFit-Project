@@ -1,80 +1,90 @@
 <?php
+
 namespace App\Repositories\Implementations;
 
-use App\Repositories\interfaces\IMealRepository;
-
+use App\Repositories\Interfaces\IMealRepository;
 use App\Dtos\Requests\CreateMealRequest;
 use App\Dtos\Requests\UpdateMealRequest;
 use App\Dtos\Responses\MealResponse;
 use App\Enums\MealType;
 use App\Core\Database;
-use App\Core\Logger;
+use Psr\Log\LoggerInterface;
+use App\Core\LoggerFactory;
 use PDOException;
 
-class MealRepository implements IMealRepository {
+class MealRepository implements IMealRepository
+{
     private \PDO $pdo;
+    private LoggerInterface $logger;
 
-    public function __construct(?\PDO $pdo = null) {
+    public function __construct(?\PDO $pdo = null, ?LoggerInterface $logger = null)
+    {
         $this->pdo = $pdo ?? Database::getConnection();
+        $this->logger = $logger ?? LoggerFactory::create();
     }
 
-    public function getById(int $id) : MealResponse {
+    public function getById(int $id): MealResponse
+    {
         try {
-        $stmt = $this->pdo->prepare("SELECT * FROM meals WHERE id = :id");
-        $stmt->execute([
+            $stmt = $this->pdo->prepare("SELECT * FROM meals WHERE id = :id");
+            $stmt->execute([
             "id" => $id,
-        ]);
-        $data = $stmt->fetch();
-        if (!$data) {
-            throw new \Exception("Прием пищи не найден"); 
-        }
+            ]);
+            $data = $stmt->fetch();
+            if (!$data) {
+                throw new \Exception("Прием пищи не найден");
+            }
 
-        $mealDto = new MealResponse (
-            id: $data['id'],
-            userId: $data['user_id'],
-            foodId: $data['food_id'],
-            mealType: MealType::from($data['meal_type']),
-            consumedAt: new \DateTimeImmutable($data['consumed_at']),
-            amountGrams : $data['amount_grams']
-        );
+            $mealDto = new MealResponse(
+                id: $data['id'],
+                userId: $data['user_id'],
+                foodId: $data['food_id'],
+                amountGrams: $data['amount_grams'],
+                mealType: MealType::from($data['meal_type']),
+                consumedAt: new \DateTimeImmutable($data['consumed_at'])
+            );
 
-        return $mealDto;
-        }
-        catch (PDOException $e) {
+            return $mealDto;
+        } catch (PDOException $e) {
             $msg = "Ошибка с запросом getById";
-            Logger::getInstance()->error($msg);
-            throw new \Exception($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
 
+            throw new \Exception($msg);
         }
     }
-    public function getAll() : array {
+    public function getAll(): array
+    {
         try {
             $stmt = $this->pdo->prepare("SELECT * FROM meals");
             $stmt->execute();
 
             $data = $stmt->fetchAll();
 
-            $meals = array_map(fn($row) =>  new MealResponse (
+            $meals = array_map(fn($row) =>  new MealResponse(
                 id: $row['id'],
                 userId: $row['user_id'],
                 foodId: $row['food_id'],
+                amountGrams: $row['amount_grams'],
                 mealType: MealType::from($row['meal_type']),
                 consumedAt: new \DateTimeImmutable($data['consumed_at']),
-                amountGrams : $row['amount_grams'],
             ), $data);
 
             return $meals;
-        }
-        catch (PDOException $e){
+        } catch (PDOException $e) {
             $msg = "Ошибка с запросом getAll";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
-
     }
 
-    public function save(object $request){
-        return match(true) {
+    public function save(object $request)
+    {
+        return match (true) {
             $request instanceof CreateMealRequest => $this->create($request),
 
             $request instanceof UpdateMealRequest => $this->update($request),
@@ -83,7 +93,8 @@ class MealRepository implements IMealRepository {
         };
     }
 
-    private function create(CreateMealRequest $request) : MealResponse{
+    private function create(CreateMealRequest $request): MealResponse
+    {
         try {
             $stmt = $this->pdo->prepare("INSERT INTO meals (user_id, food_id, amount_grams, meal_type, consumed_at) VALUES (:user_id, :food_id, :amount_grams, :meal_type, :consumed_at) RETURNING id");
             $stmt->execute([
@@ -104,15 +115,18 @@ class MealRepository implements IMealRepository {
                 mealType: $request->mealType,
                 consumedAt: $request->consumedAt,
             );
-        }
-        catch (PDOException $e) {
+        } catch (PDOException $e) {
             $msg = "Ошибка с запросом create";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
 
-    private function update(UpdateMealRequest $request) : MealResponse {
+    private function update(UpdateMealRequest $request): MealResponse
+    {
         $updates = [];
         $params = ['id' => $request->id];
 
@@ -139,15 +153,18 @@ class MealRepository implements IMealRepository {
                 throw new \Exception("Прием пищи не найден.");
             }
             return $meal;
-        }
-        catch (PDOException $e) {
+        } catch (PDOException $e) {
             $msg = "Ошибка с запросом update";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
     }
 
-    public function delete(int $id) : bool{
+    public function delete(int $id): bool
+    {
         try {
             $stmt = $this->pdo->prepare("DELETE FROM meals WHERE id = :id");
             $stmt->execute([
@@ -155,14 +172,14 @@ class MealRepository implements IMealRepository {
             ]);
             $deletedRows = $stmt->rowCount();
 
-            return ($deletedRows === 0) ? false : true;
-        }
-        catch (PDOException $e) {
+            return !(($deletedRows === 0));
+        } catch (PDOException $e) {
             $msg = "Ошибка с запросом delete";
-            Logger::getInstance()->error($msg);
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
             throw new \Exception($msg);
         }
-
     }
-
 }

@@ -2,17 +2,22 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use App\Core\Logger;
+use App\Core\LoggerFactory;
 use App\Core\Config;
+use App\Core\DIContainer;
 
 //загрузка конфигурации
 Config::load(__DIR__ . '/../');
 
-set_exception_handler(function ($exception) {
-    Logger::getInstance()->critical("Необработанное исключение: " . $exception->getMessage(), [
+$logger = LoggerFactory::create();
+
+$container = new DIContainer();
+$container->set(\Psr\Log\LoggerInterface::class, $logger);
+
+set_exception_handler(function ($exception) use ($logger) {
+    $logger->critical("Необработанное исключение: " . $exception->getMessage(), [
         'file' => $exception->getFile(),
-        'line' => $exception->getLine(),
-        'type' => get_class($exception)
+        'line' => $exception->getLine()
     ]);
 
     http_response_code(500);
