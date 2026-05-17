@@ -34,7 +34,7 @@ class FoodRepository implements IFoodRepository
                 throw new \Exception("Продукт не найден");
             }
 
-            $foodDto = new FoodResponse(
+            return new FoodResponse(
                 id: $data['id'],
                 name: $data['name'],
                 calories: $data['calories'],
@@ -43,8 +43,6 @@ class FoodRepository implements IFoodRepository
                 carbs: $data['carbs'],
                 createdBy: $data['created_by'],
             );
-
-            return $foodDto;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом getById";
             $this->logger->error($msg, [
@@ -142,12 +140,7 @@ class FoodRepository implements IFoodRepository
                 'calories' => $request->calories,
             ]);
 
-            $food = $this->getById($request->id);
-
-            if (!$food) {
-                throw new \Exception("Прием пищи не найден.");
-            }
-            return $food;
+            return $this->getById($request->id);
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом update";
             $this->logger->error($msg, [
