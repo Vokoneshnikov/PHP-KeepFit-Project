@@ -2,9 +2,9 @@
 
 namespace App\Repositories\Implementations;
 
+use App\Repositories\Interfaces\IUserRepository;
 use App\Dtos\Requests\CreateUserRequest;
 use App\Dtos\Requests\UpdateUserRequest;
-use App\Repositories\Interfaces\IUserRepository;
 use App\Dtos\Responses\UserResponse;
 use App\Enums\Gender;
 use App\Core\Database;
@@ -35,14 +35,12 @@ class UserRepository implements IUserRepository
                 throw new \Exception("Пользователь не найден");
             }
 
-            $userDto = new UserResponse(
+            return new UserResponse(
                 id: $data['id'],
                 name: $data['name'],
                 gender: Gender::from($data['gender']),
                 email: $data['email'],
             );
-
-            return $userDto;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом getById";
             $this->logger->error($msg, [
@@ -60,14 +58,12 @@ class UserRepository implements IUserRepository
 
             $data = $stmt->fetchAll();
 
-            $users = array_map(fn($row) =>  new UserResponse(
+            return array_map(fn($row) => new UserResponse(
                 id: $row['id'],
                 name: $row['name'],
                 gender: Gender::from($row['gender']),
                 email: $row['email'],
             ), $data);
-
-            return $users;
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом getAll";
             $this->logger->error($msg, [
@@ -82,21 +78,25 @@ class UserRepository implements IUserRepository
     {
         return match (true) {
             $request instanceof CreateUserRequest => $this->create($request),
-
             $request instanceof UpdateUserRequest => $this->update($request),
-
-            default => throw new \InvalidArgumentException("...")
+            default => throw new \InvalidArgumentException("Неподдерживаемый тип DTO для сохранения")
         };
     }
 
     private function create(CreateUserRequest $request): UserResponse
     {
         try {
-            $stmt = $this->pdo->prepare("INSERT INTO users (name, email, password_hash, gender, birth_date) VALUES (:name, :email, :passwordHash, :gender, :birthDate) RETURNING id");
+            // RETURNING id поддерживается как в PostgreSQL, так и в современных версиях SQLite
+            $stmt = $this->pdo->prepare("
+                INSERT INTO users (name, email, password_hash, gender, birth_date) 
+                VALUES (:name, :email, :passwordHash, :gender, :birthDate) 
+                RETURNING id
+            ");
+
             $stmt->execute([
                 "name" => $request->name,
                 "email" => $request->email,
-                "passwordHash" => $request->passwordHash,
+                "passwordHash" => $request->password,
                 "gender" => $request->gender->value,
                 "birthDate" => $request->birthDate->format('Y-m-d')
             ]);
@@ -124,17 +124,21 @@ class UserRepository implements IUserRepository
         $updates = [];
         $params = ['id' => $request->id];
 
-        if ($request->name != null) {
+        if ($request->name !== null) {
             $updates[] = "name = :name";
             $params['name'] = $request->name;
         }
-        if ($request->gender != null) {
+        if ($request->gender !== null) {
             $updates[] = "gender = :gender";
             $params['gender'] = $request->gender->value;
         }
-        if ($request->birthDate != null) {
+        if ($request->birthDate !== null) {
             $updates[] = "birth_date = :birth_date";
             $params['birth_date'] = $request->birthDate->format('Y-m-d');
+        }
+        if ($request->email !== null) {
+            $updates[] = "email = :email";
+            $params['email'] = $request->email;
         }
         if (empty($updates)) {
             return $this->getById($request->id);
@@ -144,12 +148,7 @@ class UserRepository implements IUserRepository
             $stmt = $this->pdo->prepare("UPDATE users SET " . implode(', ', $updates) . " WHERE id = :id");
             $stmt->execute($params);
 
-            $user = $this->getById($request->id);
-
-            if (!$user) {
-                throw new \Exception("Пользователь не найден после обновления.");
-            }
-            return $user;
+            return $this->getById($request->id);
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом update";
             $this->logger->error($msg, [
@@ -164,14 +163,53 @@ class UserRepository implements IUserRepository
     {
         try {
             $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = :id");
-            $stmt->execute([
-                "id" => $id,
-            ]);
-            $deletedRows = $stmt->rowCount();
+            $stmt->execute(['id' => $id]);
 
-            return ($deletedRows === 0) ? false : true;
+            return $stmt->rowCount() > 0;
         } catch (PDOException $e) {
-            $msg = "Ошибка с запросом delete";
+            $msg = "Ошибка UserRepository::delete: " . $e->getMessage();
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+            throw new \Exception($msg);
+        }
+    }
+    public function findByEmail(string $email): ?UserResponse
+    {
+        try {
+            $stmt = $this->pdo->prepare("SELECT id, name, gender, email FROM users WHERE email = :email");
+            $stmt->execute(['email' => $email]);
+
+            $data = $stmt->fetch();
+            if (!$data) {
+                return null;
+            }
+
+            return new UserResponse(
+                id: $data['id'],
+                name: $data['name'],
+                gender: Gender::from($data['gender']),
+                email: $data['email']
+            );
+        } catch (PDOException $e) {
+            $msg = "Ошибка UserRepository::findByEmail: " . $e->getMessage();
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+            throw new \Exception($msg);
+        }
+    }
+
+    public function getPasswordHashByEmail(string $email): ?string
+    {
+        try {
+            $stmt = $this->pdo->prepare("SELECT password_hash FROM users WHERE email = :email");
+            $stmt->execute(['email' => $email]);
+
+            $data = $stmt->fetch();
+            return $data ? $data['password_hash'] : null;
+        } catch (PDOException $e) {
+            $msg = "Ошибка UserRepository::getPasswordHashByEmail: " . $e->getMessage();
             $this->logger->error($msg, [
                 'exception' => $e->getMessage()
             ]);

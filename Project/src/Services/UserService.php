@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\IUserRepository;
 use App\Dtos\Requests\CreateUserRequest;
-use App\Dtos\Requests\UpdateUserRequest;
 use App\Dtos\Responses\UserResponse;
 
 class UserService
@@ -18,8 +17,12 @@ class UserService
         if (!filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException("Некорректный формат email");
         }
-        $hashedPassword = password_hash($request->password, PASSWORD_BCRYPT);
 
+        if ($this->userRepository->findByEmail($request->email) !== null) {
+            throw new \InvalidArgumentException("Пользователь с таким email уже зарегистрирован");
+        }
+
+        $hashedPassword = password_hash($request->password, PASSWORD_BCRYPT);
 
         $requestWithHash = new CreateUserRequest(
             password: $hashedPassword,
@@ -32,6 +35,16 @@ class UserService
         return $this->userRepository->save($requestWithHash);
     }
 
+    public function login(string $email, string $password): ?UserResponse
+    {
+        $hash = $this->userRepository->getPasswordHashByEmail($email);
+
+        if (!$hash || !password_verify($password, $hash)) {
+            return null; // Неверный логин или пароль
+        }
+
+        return $this->userRepository->findByEmail($email);
+    }
     public function generateTokens(UserResponse $user): array
     {
         $payload = [
