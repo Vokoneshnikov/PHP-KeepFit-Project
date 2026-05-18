@@ -188,7 +188,7 @@ class UserRepository implements IUserRepository
             return new UserResponse(
                 id: $data['id'],
                 name: $data['name'],
-                gender: Gender::from($data['gender']),
+                gender: Gender::from(strtolower($data['gender'])),
                 email: $data['email']
             );
         } catch (PDOException $e) {

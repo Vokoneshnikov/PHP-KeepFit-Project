@@ -29,13 +29,16 @@ class MealService
     {
         $food = $this->foodRepository->getById($foodId);
 
-        $coef = $grams / 100;
+        $proteins = round(($food->proteins * $grams) / 100, 1);
+        $fats     = round(($food->fats * $grams) / 100, 1);
+        $carbs    = round(($food->carbs * $grams) / 100, 1);
+        $calories = round(($food->calories * $grams) / 100, 1);
 
         return [
-            'calories' => round($food->calories * $coef, 1),
-            'proteins' => round($food->proteins * $coef, 1),
-            'fats' => round($food->fats * $coef, 1),
-            'carbs' => round($food->carbs * $coef, 1),
+            'calories' => $calories,
+            'proteins' => $proteins,
+            'fats' => $fats,
+            'carbs' => $carbs,
         ];
     }
 }

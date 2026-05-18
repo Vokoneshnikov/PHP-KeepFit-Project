@@ -27,7 +27,10 @@ abstract class BaseController
     // Безопасное извлечение ассоциативного массива из тела JSON-запроса
     protected function getJsonBody(ServerRequestInterface $request): array
     {
-        $body = $request->getBody()->getRemainingContents();
+        $stream = $request->getBody();
+        $stream->rewind();
+
+        $body = $stream->getContents();
         if (empty($body)) {
             $body = (string)$request->getParsedBody();
         }
