@@ -10,8 +10,12 @@ use App\Dtos\Responses\UserResponse;
 class UserService
 {
     public function __construct(
-        private IUserRepository $userRepository
+        private readonly IUserRepository $userRepository
     ) {}
+    public function getProfile(int $id): UserResponse
+    {
+        return $this->userRepository->getById($id);
+    }
 
     public function register(CreateUserRequest $request): UserResponse
     {
@@ -41,7 +45,7 @@ class UserService
         $hash = $this->userRepository->getPasswordHashByEmail($email);
 
         if (!$hash || !password_verify($password, $hash)) {
-            return null; // Неверный логин или пароль
+            return null;
         }
 
         return $this->userRepository->findByEmail($email);
@@ -69,7 +73,6 @@ class UserService
             'exp' => time() + 3600 // Access токен на 1 час
         ];
 
-        // Простейшая генерация JWT (Base64Url)
         $header = json_encode(['alg' => 'HS256', 'typ' => 'JWT']);
         $base64UrlHeader = $this->base64UrlEncode($header);
         $base64UrlPayload = $this->base64UrlEncode(json_encode($payload));
@@ -79,8 +82,6 @@ class UserService
         $base64UrlSignature = $this->base64UrlEncode($signature);
 
         $accessToken = $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
-
-        // Манекен для Refresh токена (в продакшене его стоит писать в БД)
         $refreshToken = bin2hex(random_bytes(32));
 
         return [
