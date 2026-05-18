@@ -21,6 +21,56 @@ class FoodRepository implements IFoodRepository
         $this->pdo = $pdo ?? Database::getConnection();
         $this->logger = $logger ?? LoggerFactory::create();
     }
+    public function search(string $query): array
+    {
+        try {
+            $stmt = $this->pdo->prepare("SELECT * FROM foods WHERE name LIKE :query LIMIT 50");
+            $stmt->execute(['query' => '%' . $query . '%']);
+            $data = $stmt->fetchAll();
+
+            return array_map(fn($row) => new FoodResponse(
+                id: $row['id'],
+                name: $row['name'],
+                calories: $row['calories'],
+                proteins: $row['proteins'],
+                fats: $row['fats'],
+                carbs: $row['carbs'],
+                createdBy: $row['created_by'],
+            ), $data);
+        } catch (PDOException $e) {
+            $msg = "Ошибка с запросом search";
+            $this->logger->error($msg, ['exception' => $e->getMessage()]);
+            throw new \Exception($msg);
+        }
+    }
+
+    public function getRecentByUserId(int $userId): array
+    {
+        try {
+            // Выбираем продукты из истории питания пользователя
+            $stmt = $this->pdo->prepare("
+                SELECT DISTINCT f.* FROM foods f 
+                JOIN meal_logs m ON f.id = m.food_id 
+                WHERE m.user_id = :user_id 
+                ORDER BY m.id DESC LIMIT 10
+            ");
+            $stmt->execute(['user_id' => $userId]);
+            $data = $stmt->fetchAll();
+
+            return array_map(fn($row) => new FoodResponse(
+                id: $row['id'],
+                name: $row['name'],
+                calories: $row['calories'],
+                proteins: $row['proteins'],
+                fats: $row['fats'],
+                carbs: $row['carbs'],
+                createdBy: $row['created_by'],
+            ), $data);
+        } catch (PDOException $e) {
+            // Возвращаем пустой массив, если таблицы meal_logs пока нет
+            return [];
+        }
+    }
 
     public function getById(int $id): FoodResponse
     {
