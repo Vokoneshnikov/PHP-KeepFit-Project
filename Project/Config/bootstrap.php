@@ -5,6 +5,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use App\Core\LoggerFactory;
 use App\Core\Config;
 use App\Core\DIContainer;
+use Psr\Log\LoggerInterface;
 
 //загрузка конфигурации
 Config::load(__DIR__ . '/../');
@@ -12,7 +13,20 @@ Config::load(__DIR__ . '/../');
 $logger = LoggerFactory::create();
 
 $container = new DIContainer();
-$container->set(\Psr\Log\LoggerInterface::class, $logger);
+$dsn = 'pgsql:host=127.0.0.1;port=5432;dbname=food_diary';
+$username = 'postgres';
+$password = 'postgres';
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+];
+
+$pdo = new \PDO($dsn, $username, $password, $options);
+
+/** @var \App\Core\DIContainer $container */
+$container->set(\PDO::class, $pdo);
+
+$container->set(LoggerInterface::class, $logger);
 
 set_exception_handler(function ($exception) use ($logger) {
     $logger->critical("Необработанное исключение: " . $exception->getMessage(), [
