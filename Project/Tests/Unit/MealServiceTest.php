@@ -9,12 +9,15 @@ use App\Services\MealService;
 use App\Dtos\Requests\CreateMealRequest;
 use App\Repositories\Interfaces\IMealRepository;
 use App\Repositories\Interfaces\IFoodRepository;
+use PHPUnit\Framework\Attributes\DataProvider;
 use App\Dtos\Responses\FoodResponse;
 
 class MealServiceTest extends TestCase
 {
 
     //Тест 1-3: Проверка корректности пересчета КБЖУ с использованием DataProvider
+
+    #[DataProvider('cpfcDataProvider')]
     public function testCalculateCalculatedCpfc(
         float $productCalories, float $productProteins, float $productFats, float $productCarbs,
         int $grams,
