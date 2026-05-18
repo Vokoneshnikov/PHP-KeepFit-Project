@@ -5,12 +5,22 @@ namespace App\Core;
 class DIContainer
 {
     private array $instances = [];
+    private array $bindings = [];
+
+    public function bind(string $abstract, string $concrete): void
+    {
+        $this->bindings[$abstract] = $concrete;
+    }
     public function set(string $id, $instance): void
     {
         $this->instances[$id] = $instance;
     }
     public function get($className)
     {
+        if (isset($this->bindings[$className])) {
+            $className = $this->bindings[$className];
+        }
+
         if (isset($this->instances[$className])) {
             return $this->instances[$className];
         }
