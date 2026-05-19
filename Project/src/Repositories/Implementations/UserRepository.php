@@ -217,4 +217,22 @@ class UserRepository implements IUserRepository
             throw new \Exception($msg);
         }
     }
+    public function getBirthDateById(int $id): string
+    {
+        try {
+            $stmt = $this->pdo->prepare("SELECT birth_date FROM users WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+            $data = $stmt->fetch();
+
+            if (!$data) {
+                throw new \Exception("Пользователь не найден");
+            }
+
+            return $data['birth_date'];
+        } catch (PDOException $e) {
+            $msg = "Ошибка UserRepository::getBirthDateById";
+            $this->logger->error($msg, ['exception' => $e->getMessage()]);
+            throw new \Exception($msg);
+        }
+    }
 }
