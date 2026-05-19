@@ -23,8 +23,6 @@ class MealService
         }
         return $this->mealRepository->save($request);
     }
-
-
     public function addFoodToLog(int $userId, int $foodId, float $weight, string $mealType): MealResponse
     {
         // Собираем DTO для репозитория
@@ -32,10 +30,9 @@ class MealService
             $userId,
         $foodId,
         $weight,
-        MealType::from(ucfirst($mealType)),
+        MealType::from(strtolower($mealType)),
         new \DateTimeImmutable(),
         );
-
 
         return $this->addMealRecord($request);
     }
