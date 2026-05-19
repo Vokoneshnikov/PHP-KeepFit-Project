@@ -64,6 +64,10 @@ class UserService
         }
         return $this->userRepository->save($request);
     }
+    public function getUserBirthDate(int $id): string
+    {
+        return $this->userRepository->getBirthDateById($id);
+    }
     public function generateTokens(UserResponse $user): array
     {
         $payload = [
@@ -94,4 +98,5 @@ class UserService
     {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($data));
     }
+
 }
