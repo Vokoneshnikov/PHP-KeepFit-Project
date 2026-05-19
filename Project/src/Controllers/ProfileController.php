@@ -10,6 +10,7 @@ use App\Dtos\Requests\RecalculateNormsRequest;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use App\Enums\Gender;
+use App\Enums\FitnessGoal;
 
 class ProfileController extends BaseController
 {
@@ -22,13 +23,26 @@ class ProfileController extends BaseController
     public function index(ServerRequestInterface $request): ResponseInterface
     {
         $userId = $request->getAttribute('user_id');
+
         if (!$userId) {
             return $this->error("Пользователь не авторизован", 401);
         }
 
         try {
             $user = $this->userService->getProfile((int)$userId);
-            return $this->json($user, 200);
+            $profileStatistics = $this->statisticsService->getProfileStatistics((int)$userId);
+
+            return $this->json([
+                'id' => $user->id,
+                'name' => $user->name,
+                'gender' => $user->gender->value,
+                'email' => $user->email,
+
+                'parameters' => $profileStatistics['parameters'],
+                'dailyNorm' => $profileStatistics['dailyNorm'],
+                'monthlyAverage' => $profileStatistics['monthlyAverage'],
+            ], 200);
+
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);
         }
@@ -73,14 +87,24 @@ class ProfileController extends BaseController
     public function editRecalculationInfo(ServerRequestInterface $request): ResponseInterface
     {
         $userId = $request->getAttribute('user_id');
-        //TODO:
-        // В будущем этот метод должен возвращать последние сохраненные параметры
-        // из таблицы пользовательских норм (UserNorms), чтобы фронтенд мог предзаполнить форму.
-        return $this->json([
-            'weight' => null,
-            'height' => null,
-            'activityLevel' => 1.2
-        ], 200);
+
+        if (!$userId) {
+            return $this->error("Пользователь не авторизован", 401);
+        }
+
+        try {
+            $profileStatistics = $this->statisticsService->getProfileStatistics((int)$userId);
+
+            return $this->json([
+                'weight' => $profileStatistics['parameters']['weight'],
+                'height' => $profileStatistics['parameters']['height'],
+                'activityLevel' => $profileStatistics['parameters']['activityLevel'],
+                'goal' => $profileStatistics['parameters']['goal'],
+            ], 200);
+
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 
     #[Route('/profile/recalculate', ['POST'])]
@@ -93,8 +117,19 @@ class ProfileController extends BaseController
 
         $body = $this->getJsonBody($request);
 
-        if (empty($body['weight']) || empty($body['height']) || empty($body['activityLevel'])) {
-            return $this->error("Необходимы параметры: weight, height, activityLevel");
+        if (
+            empty($body['weight']) ||
+            empty($body['height']) ||
+            empty($body['activityLevel']) ||
+            empty($body['goal'])
+        ) {
+            return $this->error("Необходимы параметры: weight, height, activityLevel, goal");
+        }
+
+        $goal = FitnessGoal::tryFrom($body['goal']);
+
+        if (!$goal) {
+            return $this->error("Недопустимое значение goal. Допустимые значения: lose, maintain, gain");
         }
 
         try {
@@ -102,7 +137,8 @@ class ProfileController extends BaseController
                 userId: (int)$userId,
                 weight: (float)$body['weight'],
                 height: (float)$body['height'],
-                activityLevel: (float)$body['activityLevel']
+                activityLevel: (float)$body['activityLevel'],
+                goal: $goal
             );
 
             $calculatedNorms = $this->statisticsService->calculateAndSaveNorms($dto);

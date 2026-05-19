@@ -47,14 +47,23 @@ class FoodRepository implements IFoodRepository
     public function getRecentByUserId(int $userId): array
     {
         try {
-            // Выбираем продукты из истории питания пользователя
             $stmt = $this->pdo->prepare("
-                SELECT DISTINCT f.* FROM foods f 
-                JOIN meal_logs m ON f.id = m.food_id 
-                WHERE m.user_id = :user_id 
-                ORDER BY m.id DESC LIMIT 10
-            ");
-            $stmt->execute(['user_id' => $userId]);
+            SELECT f.*
+            FROM foods f
+            JOIN (
+                SELECT food_id, MAX(id) AS last_meal_id
+                FROM meals
+                WHERE user_id = :user_id
+                GROUP BY food_id
+            ) recent ON recent.food_id = f.id
+            ORDER BY recent.last_meal_id DESC
+            LIMIT 15
+        ");
+
+            $stmt->execute([
+                'user_id' => $userId
+            ]);
+
             $data = $stmt->fetchAll();
 
             return array_map(fn($row) => new FoodResponse(
@@ -67,8 +76,12 @@ class FoodRepository implements IFoodRepository
                 createdBy: $row['created_by'],
             ), $data);
         } catch (PDOException $e) {
-            // Возвращаем пустой массив, если таблицы meal_logs пока нет
-            return [];
+            $msg = "Ошибка с запросом getRecentByUserId";
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
+            throw new \Exception($msg);
         }
     }
 
