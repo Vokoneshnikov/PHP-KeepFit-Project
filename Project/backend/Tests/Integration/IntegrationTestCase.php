@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Integration;
+namespace backend\Tests\Integration;
 
-use PHPUnit\Framework\TestCase;
 use PDO;
+use PHPUnit\Framework\TestCase;
 
 abstract class IntegrationTestCase extends TestCase
 {

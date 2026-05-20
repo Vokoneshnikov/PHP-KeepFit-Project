@@ -8,7 +8,7 @@ use App\Core\DIContainer;
 use Psr\Log\LoggerInterface;
 
 //загрузка конфигурации
-Config::load(__DIR__ . '/../');
+Config::load(__DIR__ . '/Project/');
 
 $logger = LoggerFactory::create();
 

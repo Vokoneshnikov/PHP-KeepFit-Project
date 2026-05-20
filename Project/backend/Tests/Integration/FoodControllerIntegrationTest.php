@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Integration;
+namespace backend\Tests\Integration;
 
 use App\Controllers\FoodController;
 use App\Repositories\Implementations\FoodRepository;
@@ -9,7 +9,6 @@ use App\Services\FoodService;
 use App\Services\MealService;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Utils;
-use Psr\Http\Message\ResponseInterface;
 
 class FoodControllerIntegrationTest extends IntegrationTestCase
 {

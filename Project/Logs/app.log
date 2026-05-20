@@ -1,4 +1,0 @@
-[2026-05-11T13:30:06.704330+00:00] logger-app.INFO: >>> Входящий запрос: GET /profile {"query":[],"ip":"::1"} []
-[2026-05-11T13:30:06.712367+00:00] logger-app.INFO: <<< Запрос обработан: GET /profile {"status":200,"duration":"10.35ms"} []
-[2026-05-11T13:30:16.264801+00:00] logger-app.INFO: >>> Входящий запрос: GET /diary {"query":[],"ip":"::1"} []
-[2026-05-11T13:30:16.267545+00:00] logger-app.INFO: <<< Запрос обработан: GET /diary {"status":200,"duration":"4.29ms"} []

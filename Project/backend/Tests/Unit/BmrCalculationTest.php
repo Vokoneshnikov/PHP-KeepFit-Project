@@ -1,14 +1,14 @@
 <?php
 
-namespace Tests\Unit;
+namespace backend\Tests\Unit;
 
 use App\Dtos\Requests\RecalculateNormsRequest;
 use App\Dtos\Responses\UserResponse;
 use App\Enums\FitnessGoal;
 use App\Enums\Gender;
+use App\Repositories\Implementations\StatisticsRepository;
 use App\Services\StatisticsService;
 use App\Services\UserService;
-use App\Repositories\Implementations\StatisticsRepository;
 use PHPUnit\Framework\TestCase;
 
 class BmrCalculationTest extends TestCase

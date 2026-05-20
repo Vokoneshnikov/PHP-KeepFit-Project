@@ -1,13 +1,12 @@
 <?php
 
-namespace Tests\Integration;
+namespace backend\Tests\Integration;
 
 use App\Controllers\AuthController;
 use App\Repositories\Implementations\UserRepository;
 use App\Services\UserService;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Utils;
-use Psr\Http\Message\ResponseInterface;
 
 class AuthControllerIntegrationTest extends IntegrationTestCase
 {

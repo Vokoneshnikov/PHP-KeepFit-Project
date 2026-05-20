@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Unit;
+namespace backend\Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Controllers\AuthController;
 use App\Services\UserService;
 use GuzzleHttp\Psr7\ServerRequest;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
 class AuthControllerTest extends TestCase

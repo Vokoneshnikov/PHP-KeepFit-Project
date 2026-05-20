@@ -1,16 +1,16 @@
 <?php
 
-namespace Tests\Unit;
+namespace backend\Tests\Unit;
 
+use App\Dtos\Requests\CreateMealRequest;
+use App\Dtos\Responses\FoodResponse;
 use App\Dtos\Responses\MealResponse;
 use App\Enums\MealType;
-use PHPUnit\Framework\TestCase;
-use App\Services\MealService;
-use App\Dtos\Requests\CreateMealRequest;
-use App\Repositories\Interfaces\IMealRepository;
 use App\Repositories\Interfaces\IFoodRepository;
+use App\Repositories\Interfaces\IMealRepository;
+use App\Services\MealService;
 use PHPUnit\Framework\Attributes\DataProvider;
-use App\Dtos\Responses\FoodResponse;
+use PHPUnit\Framework\TestCase;
 
 class MealServiceTest extends TestCase
 {

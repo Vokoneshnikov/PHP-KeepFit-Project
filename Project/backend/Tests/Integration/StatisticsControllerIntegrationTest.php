@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Integration;
+namespace backend\Tests\Integration;
 
 use App\Controllers\StatisticsController;
 use App\Services\StatisticsService;

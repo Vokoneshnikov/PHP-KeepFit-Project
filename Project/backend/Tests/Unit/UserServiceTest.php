@@ -1,13 +1,13 @@
 <?php
 
-namespace Tests\Unit;
+namespace backend\Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
-use App\Services\UserService;
-use App\Repositories\Interfaces\IUserRepository;
 use App\Dtos\Requests\CreateUserRequest;
 use App\Dtos\Responses\UserResponse;
 use App\Enums\Gender;
+use App\Repositories\Interfaces\IUserRepository;
+use App\Services\UserService;
+use PHPUnit\Framework\TestCase;
 
 class UserServiceTest extends TestCase
 {

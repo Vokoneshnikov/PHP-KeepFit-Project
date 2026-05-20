@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Integration;
+namespace backend\Tests\Integration;
 
 use App\Controllers\MealController;
 use App\Repositories\Implementations\FoodRepository;

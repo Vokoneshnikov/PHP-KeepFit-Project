@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Integration;
+namespace backend\Tests\Integration;
 
 use App\Controllers\ProfileController;
 use App\Dtos\Responses\DailyNormsResponse;
 use App\Repositories\Implementations\UserRepository;
-use App\Services\UserService;
 use App\Services\StatisticsService;
+use App\Services\UserService;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Utils;
 

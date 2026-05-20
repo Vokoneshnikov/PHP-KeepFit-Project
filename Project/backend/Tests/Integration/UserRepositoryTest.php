@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Integration;
+namespace backend\Tests\Integration;
 
-use App\Repositories\Implementations\UserRepository;
 use App\Dtos\Requests\CreateUserRequest;
 use App\Enums\Gender;
+use App\Repositories\Implementations\UserRepository;
 
 class UserRepositoryTest extends IntegrationTestCase
 {
