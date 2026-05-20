@@ -77,9 +77,10 @@ class ProfileControllerIntegrationTest extends IntegrationTestCase
     public function testUpdateProfileInfoSuccess()
     {
         $rawBody = json_encode([
-            'name' => 'Костя Новый',
-            'email' => 'new_email@fit.com'
-            // Поля gender и birthDate не передаем, они не должны затереться в БД
+            'weight' => 85.5,
+            'height' => 182,
+            'activityLevel' => 1.375,
+            'goal' => 'maintain'
         ]);
 
         $request = (new ServerRequest('POST', '/profile/edit'))
@@ -157,6 +158,6 @@ class ProfileControllerIntegrationTest extends IntegrationTestCase
         $this->assertEquals(400, $response->getStatusCode());
 
         $responseBody = json_decode((string)$response->getBody(), true);
-        $this->assertStringContainsString('Необходимы параметры: weight, height, activityLevel', $responseBody['error']);
+        $this->assertStringContainsString('Необходимы параметры: weight, height, activityLevel, goal', $responseBody['error']);
     }
 }

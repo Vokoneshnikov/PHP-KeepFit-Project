@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Dtos\Requests\RecalculateNormsRequest;
 use App\Dtos\Responses\UserResponse;
+use App\Enums\FitnessGoal;
 use App\Enums\Gender;
 use App\Services\StatisticsService;
 use App\Services\UserService;
@@ -42,7 +43,8 @@ class BmrCalculationTest extends TestCase
             userId: 1,
             weight: 80.0,
             height: 180.0,
-            activityLevel: 1.55
+            activityLevel: 1.55,
+            goal: FitnessGoal::Maintain
         );
 
         $response = $service->calculateAndSaveNorms($request);
