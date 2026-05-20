@@ -233,4 +233,39 @@ class FoodRepository implements IFoodRepository
             throw new \Exception($msg);
         }
     }
+    public function getCustomByUserId(int $userId): array
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+            SELECT *
+            FROM foods
+            WHERE created_by = :user_id
+            ORDER BY id DESC
+        ");
+
+            $stmt->execute([
+                'user_id' => $userId
+            ]);
+
+            $data = $stmt->fetchAll();
+
+            return array_map(fn($row) => new FoodResponse(
+                id: $row['id'],
+                name: $row['name'],
+                calories: $row['calories'],
+                proteins: $row['proteins'],
+                fats: $row['fats'],
+                carbs: $row['carbs'],
+                createdBy: $row['created_by'],
+            ), $data);
+
+        } catch (PDOException $e) {
+            $msg = "Ошибка с запросом getCustomByUserId";
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage()
+            ]);
+
+            throw new \Exception($msg);
+        }
+    }
 }
