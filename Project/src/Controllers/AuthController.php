@@ -7,11 +7,13 @@ use Psr\Http\Message\ServerRequestInterface;
 use App\Services\UserService;
 use App\Dtos\Requests\CreateUserRequest;
 use App\Enums\Gender;
+use App\Core\Route;
 
 class AuthController extends BaseController
 {
     public function __construct(private readonly UserService $userService) {}
 
+    #[Route('/api/register', ['POST'])]
     public function register(ServerRequestInterface $request): ResponseInterface
     {
         $body = $this->getJsonBody($request);
@@ -25,12 +27,16 @@ class AuthController extends BaseController
 
         $gender = Gender::tryFrom($body['gender']);
         if (!$gender) {
-            return $this->error("Передано недопустимое значение для поля gender. Допустимые: Male, Female");
+            return $this->error("Передано недопустимое значение для поля gender. Допустимые: male, female");
         }
 
         try {
             $birthDate = new \DateTimeImmutable($body['birthDate']);
+        } catch (\Exception $e) {
+            return $this->error("Некорректный формат даты рождения. Используйте YYYY-MM-DD", 400);
+        }
 
+        try {
             $dto = new CreateUserRequest(
                 password: $body['password'],
                 email: $body['email'],
@@ -45,11 +51,11 @@ class AuthController extends BaseController
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
         } catch (\Exception $e) {
-            // Сюда мы упадем, например, если дата была в формате "ноябрябрь 2015"
-            return $this->error("Некорректный формат даты рождения. Используйте YYYY-MM-DD", 400);
+            return $this->error("Ошибка регистрации: " . $e->getMessage(), 400);
         }
     }
 
+    #[Route('/api/login', ['POST'])]
     public function login(ServerRequestInterface $request): ResponseInterface
     {
         $body = $this->getJsonBody($request);

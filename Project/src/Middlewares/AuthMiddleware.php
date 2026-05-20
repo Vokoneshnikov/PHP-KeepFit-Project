@@ -13,6 +13,20 @@ class AuthMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $path = $request->getUri()->getPath();
+        $method = strtoupper($request->getMethod());
+
+        // Публичные маршруты, где токен не нужен
+        $publicRoutes = [
+            ['POST', '/api/register'],
+            ['POST', '/api/login'],
+        ];
+
+        foreach ($publicRoutes as [$publicMethod, $publicPath]) {
+            if ($method === $publicMethod && $path === $publicPath) {
+                return $handler->handle($request);
+            }
+        }
         $authHeader = $request->getHeaderLine('Authorization');
 
         // Проверяем формат заголовка "Bearer {token}"
@@ -29,7 +43,7 @@ class AuthMiddleware implements MiddlewareInterface
 
         $request = $request->withAttribute('user_id', $userData['sub']);
 
-        return $handler->process($request);
+        return $handler->handle($request);
     }
 
     private function validateToken(string $token): ?array
@@ -52,7 +66,9 @@ class AuthMiddleware implements MiddlewareInterface
 
         $payload = json_decode($this->base64UrlDecode($base64UrlPayload), true);
 
-        // Проверяем время жизни токена (exp)
+        if (!is_array($payload)) {
+            return null;
+        }
         if (isset($payload['exp']) && $payload['exp'] < time()) {
             return null;
         }
@@ -74,7 +90,7 @@ class AuthMiddleware implements MiddlewareInterface
         return new Response(
             $status,
             ['Content-Type' => 'application/json'],
-            json_encode(['error' => $message])
+            json_encode(['error' => $message], JSON_UNESCAPED_UNICODE)
         );
     }
 }

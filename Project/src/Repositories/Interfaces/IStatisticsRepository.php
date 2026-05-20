@@ -9,4 +9,6 @@ interface IStatisticsRepository
     function getWeeklyProgress(int $userId): array;
     function getMonthlyProgress(int $userId): array;
     function getAveragesAndNorms(int $userId, string $period = 'week'): array;
+    function getLatestUserParameters(int $userId): ?array;
+    function getLatestDailyNorm(int $userId): ?array;
 }

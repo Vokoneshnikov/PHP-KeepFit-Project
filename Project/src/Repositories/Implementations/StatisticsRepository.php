@@ -63,9 +63,12 @@ class StatisticsRepository implements IStatisticsRepository
                 'goal'            => $goal           // Запись в Postgres-enum fitness_goal
             ]);
         } catch (PDOException $e) {
-            $this->logger->error("Ошибка StatisticsRepository::saveUserParameters", ['exception' => $e->getMessage()]);
-            throw new \Exception("Не удалось сохранить параметры пользователя в БД");
-        }
+$this->logger->error("Ошибка StatisticsRepository::saveUserParameters", [
+'exception' => $e->getMessage()
+]);
+
+throw new \Exception("Не удалось сохранить параметры пользователя в БД: " . $e->getMessage());
+}
     }
 
     /**
@@ -192,6 +195,91 @@ class StatisticsRepository implements IStatisticsRepository
         } catch (PDOException $e) {
             $this->logger->error("Ошибка StatisticsRepository::getAveragesAndNorms", ['exception' => $e->getMessage()]);
             throw new \Exception("Ошибка агрегации средних значений");
+        }
+    }
+    public function getLatestUserParameters(int $userId): ?array
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+            SELECT
+                weight,
+                height,
+                activity_factor::text AS activity_factor,
+                goal::text AS goal,
+                measured_at
+            FROM user_parameters
+            WHERE user_id = :user_id
+            ORDER BY measured_at DESC
+            LIMIT 1
+        ");
+
+            $stmt->execute([
+                'user_id' => $userId
+            ]);
+
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$data) {
+                return null;
+            }
+
+            return [
+                'weight' => round((float)$data['weight'], 2),
+                'height' => (int)$data['height'],
+                'activityLevel' => $data['activity_factor'],
+                'goal' => $data['goal'],
+                'measuredAt' => $data['measured_at'],
+            ];
+
+        } catch (PDOException $e) {
+            $this->logger->error("Ошибка StatisticsRepository::getLatestUserParameters", [
+                'exception' => $e->getMessage()
+            ]);
+
+            throw new \Exception("Не удалось получить последние параметры пользователя");
+        }
+    }
+
+    public function getLatestDailyNorm(int $userId): ?array
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+            SELECT
+                calories,
+                proteins,
+                fats,
+                carbs,
+                created_at
+            FROM daily_norms
+            WHERE user_id = :user_id
+            ORDER BY created_at DESC
+            LIMIT 1
+        ");
+
+            $stmt->execute([
+                'user_id' => $userId
+            ]);
+
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$data) {
+                return null;
+            }
+
+            return [
+                'calories' => (int)$data['calories'],
+                'proteins' => round((float)$data['proteins'], 1),
+                'fats' => round((float)$data['fats'], 1),
+                'carbs' => round((float)$data['carbs'], 1),
+                'createdAt' => $data['created_at'],
+            ];
+
+        } catch (PDOException $e) {
+            $this->logger->error("Ошибка StatisticsRepository::getLatestDailyNorm", [
+                'exception' => $e->getMessage()
+            ]);
+
+            throw new \Exception("Не удалось получить последнюю норму КБЖУ");
         }
     }
 }

@@ -2,29 +2,40 @@
 
 namespace App\Controllers;
 
-use App\Services\DiaryService;
 use App\Core\Route;
+use App\Services\DiaryService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use GuzzleHttp\Psr7\Response;
 
-class DiaryController
+class DiaryController extends BaseController
 {
     public function __construct(
-        // private DiaryService $diaryService,
+        private readonly DiaryService $diaryService
     ) {
     }
+
     #[Route('/diary', ['GET'])]
     public function index(ServerRequestInterface $request): ResponseInterface
     {
+        $userId = $request->getAttribute('user_id');
+
+        if (!$userId) {
+            return $this->error("Пользователь не авторизован", 401);
+        }
+
         $queryParams = $request->getQueryParams();
-        $date = $queryParams['date'] ?? 'не указана';
 
-        $body = "Контроллер: Diary, Метод: index. Дата: " . $date;
+        $date = $queryParams['date'] ?? date('Y-m-d');
 
-        return new Response(200, [], $body);
+        try {
+            $diary = $this->diaryService->getDiaryForDate((int)$userId, $date);
+
+            return $this->json($diary, 200);
+
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 400);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 }
-
-// DiaryController:
-// GET /diary?date={date} - получение информации для дневника за этот день(конкретные приемы пищи с содержимым)
