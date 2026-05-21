@@ -2,14 +2,15 @@
 
 namespace App\Repositories\Implementations;
 
-use App\Repositories\Interfaces\IFoodRepository;
+use App\Core\Database;
+use App\Core\LoggerFactory;
 use App\Dtos\Requests\CreateFoodRequest;
 use App\Dtos\Requests\UpdateFoodRequest;
 use App\Dtos\Responses\FoodResponse;
-use App\Core\Database;
-use Psr\Log\LoggerInterface;
-use App\Core\LoggerFactory;
+use App\Models\Food;
+use App\Repositories\Interfaces\IFoodRepository;
 use PDOException;
+use Psr\Log\LoggerInterface;
 
 class FoodRepository implements IFoodRepository
 {
@@ -24,22 +25,27 @@ class FoodRepository implements IFoodRepository
     public function search(string $query): array
     {
         try {
-            $stmt = $this->pdo->prepare("SELECT * FROM foods WHERE name LIKE :query LIMIT 50");
-            $stmt->execute(['query' => '%' . $query . '%']);
+            $stmt = $this->pdo->prepare("
+                SELECT *
+                FROM foods
+                WHERE name LIKE :query
+                LIMIT 50
+            ");
+
+            $stmt->execute([
+                'query' => '%' . $query . '%',
+            ]);
+
             $data = $stmt->fetchAll();
 
-            return array_map(fn($row) => new FoodResponse(
-                id: $row['id'],
-                name: $row['name'],
-                calories: $row['calories'],
-                proteins: $row['proteins'],
-                fats: $row['fats'],
-                carbs: $row['carbs'],
-                createdBy: $row['created_by'],
-            ), $data);
+            return $this->mapRowsToResponses($data);
         } catch (PDOException $e) {
-            $msg = "Ошибка с запросом search";
-            $this->logger->error($msg, ['exception' => $e->getMessage()]);
+            $msg = 'Ошибка с запросом search';
+
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage(),
+            ]);
+
             throw new \Exception($msg);
         }
     }
@@ -48,37 +54,58 @@ class FoodRepository implements IFoodRepository
     {
         try {
             $stmt = $this->pdo->prepare("
-            SELECT f.*
-            FROM foods f
-            JOIN (
-                SELECT food_id, MAX(id) AS last_meal_id
-                FROM meals
-                WHERE user_id = :user_id
-                GROUP BY food_id
-            ) recent ON recent.food_id = f.id
-            ORDER BY recent.last_meal_id DESC
-            LIMIT 15
-        ");
+                SELECT f.*
+                FROM foods f
+                JOIN (
+                    SELECT food_id, MAX(id) AS last_meal_id
+                    FROM meals
+                    WHERE user_id = :user_id
+                    GROUP BY food_id
+                ) recent ON recent.food_id = f.id
+                ORDER BY recent.last_meal_id DESC
+                LIMIT 15
+            ");
 
             $stmt->execute([
-                'user_id' => $userId
+                'user_id' => $userId,
             ]);
 
             $data = $stmt->fetchAll();
 
-            return array_map(fn($row) => new FoodResponse(
-                id: $row['id'],
-                name: $row['name'],
-                calories: $row['calories'],
-                proteins: $row['proteins'],
-                fats: $row['fats'],
-                carbs: $row['carbs'],
-                createdBy: $row['created_by'],
-            ), $data);
+            return $this->mapRowsToResponses($data);
         } catch (PDOException $e) {
-            $msg = "Ошибка с запросом getRecentByUserId";
+            $msg = 'Ошибка с запросом getRecentByUserId';
+
             $this->logger->error($msg, [
-                'exception' => $e->getMessage()
+                'exception' => $e->getMessage(),
+            ]);
+
+            throw new \Exception($msg);
+        }
+    }
+
+    public function getCustomByUserId(int $userId): array
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT *
+                FROM foods
+                WHERE created_by = :user_id
+                ORDER BY id DESC
+            ");
+
+            $stmt->execute([
+                'user_id' => $userId,
+            ]);
+
+            $data = $stmt->fetchAll();
+
+            return $this->mapRowsToResponses($data);
+        } catch (PDOException $e) {
+            $msg = 'Ошибка с запросом getCustomByUserId';
+
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage(),
             ]);
 
             throw new \Exception($msg);
@@ -88,28 +115,28 @@ class FoodRepository implements IFoodRepository
     public function getById(int $id): FoodResponse
     {
         try {
-            $stmt = $this->pdo->prepare("SELECT * FROM foods WHERE id = :id");
+            $stmt = $this->pdo->prepare("
+                SELECT *
+                FROM foods
+                WHERE id = :id
+            ");
+
             $stmt->execute([
-            "id" => $id,
+                'id' => $id,
             ]);
             $data = $stmt->fetch();
             if (!$data) {
-                throw new \Exception("Продукт не найден");
+                throw new \Exception('Продукт не найден');
             }
 
-            return new FoodResponse(
-                id: $data['id'],
-                name: $data['name'],
-                calories: $data['calories'],
-                proteins: $data['proteins'],
-                fats: $data['fats'],
-                carbs: $data['carbs'],
-                createdBy: $data['created_by'],
-            );
+            $model = $this->mapRowToModel($data);
+
+            return $this->mapModelToResponse($model);
         } catch (PDOException $e) {
-            $msg = "Ошибка с запросом getById";
+            $msg = 'Ошибка с запросом getById';
+
             $this->logger->error($msg, [
-                'exception' => $e->getMessage()
+                'exception' => $e->getMessage(),
             ]);
 
             throw new \Exception($msg);
@@ -118,26 +145,21 @@ class FoodRepository implements IFoodRepository
     public function getAll(): array
     {
         try {
-            $stmt = $this->pdo->prepare("SELECT * FROM foods");
+            $stmt = $this->pdo->prepare("
+                SELECT *
+                FROM foods
+            ");
+
             $stmt->execute();
 
             $data = $stmt->fetchAll();
 
-            $foods = array_map(fn($row) =>  new FoodResponse(
-                id: $row['id'],
-                name: $row['name'],
-                calories: $row['calories'],
-                proteins: $row['proteins'],
-                fats: $row['fats'],
-                carbs: $row['carbs'],
-                createdBy: $row['created_by'],
-            ), $data);
-
-            return $foods;
+            return $this->mapRowsToResponses($data);
         } catch (PDOException $e) {
-            $msg = "Ошибка с запросом getAll";
+            $msg = 'Ошибка с запросом getAll';
+
             $this->logger->error($msg, [
-                'exception' => $e->getMessage()
+                'exception' => $e->getMessage(),
             ]);
 
             throw new \Exception($msg);
@@ -148,17 +170,44 @@ class FoodRepository implements IFoodRepository
     {
         return match (true) {
             $request instanceof CreateFoodRequest => $this->create($request),
-
             $request instanceof UpdateFoodRequest => $this->update($request),
-
-            default => throw new \InvalidArgumentException("...")
+            default => throw new \InvalidArgumentException('Неподдерживаемый тип DTO для сохранения продукта'),
         };
+    }
+
+    public function delete(int $id): bool
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+                DELETE FROM foods
+                WHERE id = :id
+            ");
+
+            $stmt->execute([
+                'id' => $id,
+            ]);
+
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            $msg = 'Ошибка с запросом delete';
+
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage(),
+            ]);
+
+            throw new \Exception($msg);
+        }
     }
 
     private function create(CreateFoodRequest $request): FoodResponse
     {
         try {
-            $stmt = $this->pdo->prepare("INSERT INTO foods (name, calories, proteins, fats, carbs, created_by) VALUES (:name, :calories, :proteins, :fats, :carbs, :created_by) RETURNING id");
+            $stmt = $this->pdo->prepare("
+                INSERT INTO foods (name, calories, proteins, fats, carbs, created_by)
+                VALUES (:name, :calories, :proteins, :fats, :carbs, :created_by)
+                RETURNING id
+            ");
+
             $stmt->execute([
                 'name' => $request->name,
                 'calories' => $request->calories,
@@ -170,8 +219,8 @@ class FoodRepository implements IFoodRepository
 
             $result = $stmt->fetch();
 
-            return new FoodResponse(
-                id: $result['id'],
+            $model = new Food(
+                id: (int)$result['id'],
                 name: $request->name,
                 calories: $request->calories,
                 proteins: $request->proteins,
@@ -179,10 +228,12 @@ class FoodRepository implements IFoodRepository
                 carbs: $request->carbs,
                 createdBy: $request->createdBy,
             );
+            return $this->mapModelToResponse($model);
         } catch (PDOException $e) {
-            $msg = "Ошибка с запросом create";
+            $msg = 'Ошибка с запросом create';
+
             $this->logger->error($msg, [
-                'exception' => $e->getMessage()
+                'exception' => $e->getMessage(),
             ]);
 
             throw new \Exception($msg);
@@ -191,81 +242,71 @@ class FoodRepository implements IFoodRepository
     private function update(UpdateFoodRequest $request): FoodResponse
     {
         try {
-            $stmt = $this->pdo->prepare(
-                "UPDATE foods SET name = :name, calories = :calories, proteins = :proteins, fats = :fats, carbs = :carbs  WHERE id = :id"
-            );
+            $stmt = $this->pdo->prepare("
+                UPDATE foods
+                SET
+                    name = :name,
+                    calories = :calories,
+                    proteins = :proteins,
+                    fats = :fats,
+                    carbs = :carbs
+                WHERE id = :id
+            ");
+
             $stmt->execute([
                 'id' => $request->id,
                 'name' => $request->name,
+                'calories' => $request->calories,
                 'proteins' => $request->proteins,
                 'fats' => $request->fats,
                 'carbs' => $request->carbs,
-                'calories' => $request->calories,
             ]);
 
             return $this->getById($request->id);
         } catch (PDOException $e) {
             $msg = "Ошибка с запросом update";
             $this->logger->error($msg, [
-                'exception' => $e->getMessage()
+                'exception' => $e->getMessage(),
             ]);
 
             throw new \Exception($msg);
         }
     }
 
-    public function delete(int $id): bool
+    private function mapRowToModel(array $row): Food
     {
-        try {
-            $stmt = $this->pdo->prepare("DELETE FROM foods WHERE id = :id");
-            $stmt->execute([
-                "id" => $id,
-            ]);
-            $deletedRows = $stmt->rowCount();
-
-            return ($deletedRows === 0) ? false : true;
-        } catch (PDOException $e) {
-            $msg = "Ошибка с запросом delete";
-            $this->logger->error($msg, [
-                'exception' => $e->getMessage()
-            ]);
-
-            throw new \Exception($msg);
-        }
+        return new Food(
+            id: (int)$row['id'],
+            name: $row['name'],
+            calories: (float)$row['calories'],
+            proteins: (float)$row['proteins'],
+            fats: (float)$row['fats'],
+            carbs: (float)$row['carbs'],
+            createdBy: array_key_exists('created_by', $row) && $row['created_by'] !== null
+                ? (int)$row['created_by']
+                : null,
+        );
     }
-    public function getCustomByUserId(int $userId): array
+
+    private function mapModelToResponse(Food $food): FoodResponse
     {
-        try {
-            $stmt = $this->pdo->prepare("
-            SELECT *
-            FROM foods
-            WHERE created_by = :user_id
-            ORDER BY id DESC
-        ");
+        return new FoodResponse(
+            id: (int)$food->id,
+            name: $food->name,
+            calories: $food->calories,
+            proteins: $food->proteins,
+            fats: $food->fats,
+            carbs: $food->carbs,
+            createdBy: $food->createdBy,
+        );
+    }
 
-            $stmt->execute([
-                'user_id' => $userId
-            ]);
+    private function mapRowsToResponses(array $rows): array
+    {
+        return array_map(function (array $row): FoodResponse {
+            $model = $this->mapRowToModel($row);
 
-            $data = $stmt->fetchAll();
-
-            return array_map(fn($row) => new FoodResponse(
-                id: $row['id'],
-                name: $row['name'],
-                calories: $row['calories'],
-                proteins: $row['proteins'],
-                fats: $row['fats'],
-                carbs: $row['carbs'],
-                createdBy: $row['created_by'],
-            ), $data);
-
-        } catch (PDOException $e) {
-            $msg = "Ошибка с запросом getCustomByUserId";
-            $this->logger->error($msg, [
-                'exception' => $e->getMessage()
-            ]);
-
-            throw new \Exception($msg);
-        }
+            return $this->mapModelToResponse($model);
+        }, $rows);
     }
 }
