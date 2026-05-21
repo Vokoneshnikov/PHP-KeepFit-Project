@@ -25,24 +25,39 @@ class ProfileController extends BaseController
         $userId = $request->getAttribute('user_id');
 
         if (!$userId) {
-            return $this->error("Пользователь не авторизован", 401);
+            return $this->error('Пользователь не авторизован', 401);
         }
 
         try {
             $user = $this->userService->getProfile((int)$userId);
-            $profileStatistics = $this->statisticsService->getProfileStatistics((int)$userId);
+            $statistics = $this->statisticsService->getProfileStatistics((int)$userId);
 
             return $this->json([
                 'id' => $user->id,
                 'name' => $user->name,
                 'gender' => $user->gender->value,
                 'email' => $user->email,
-
-                'parameters' => $profileStatistics['parameters'],
-                'dailyNorm' => $profileStatistics['dailyNorm'],
-                'monthlyAverage' => $profileStatistics['monthlyAverage'],
+                'parameters' => $statistics['parameters'] ?? [
+                        'weight' => null,
+                        'height' => null,
+                        'activityLevel' => null,
+                        'goal' => null,
+                        'measuredAt' => null,
+                    ],
+                'dailyNorm' => $statistics['dailyNorm'] ?? [
+                        'calories' => 0,
+                        'proteins' => 0.0,
+                        'fats' => 0.0,
+                        'carbs' => 0.0,
+                        'createdAt' => null,
+                    ],
+                'monthlyAverage' => $statistics['monthlyAverage'] ?? [
+                        'calories' => 0,
+                        'proteins' => 0.0,
+                        'fats' => 0.0,
+                        'carbs' => 0.0,
+                    ],
             ], 200);
-
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);
         }
