@@ -20,9 +20,11 @@ use App\Controllers\ProfileController;
 use App\Controllers\StatisticsController;
 use App\Controllers\AuthController;
 use App\Core\Router;
+use App\Repositories\Implementations\DiaryRepository;
 use App\Repositories\Implementations\FoodRepository;
 use App\Repositories\Implementations\MealRepository;
 use App\Repositories\Implementations\UserRepository;
+use App\Repositories\Interfaces\IDiaryRepository;
 use App\Repositories\Interfaces\IFoodRepository;
 use App\Repositories\Interfaces\IMealRepository;
 use App\Repositories\Interfaces\IUserRepository;
@@ -37,6 +39,7 @@ $request = ServerRequest::fromGlobals();
 $container->bind(IFoodRepository::class, FoodRepository::class);
 $container->bind(IMealRepository::class, MealRepository::class);
 $container->bind(IUserRepository::class, UserRepository::class);
+$container->bind(IDiaryRepository::class, DiaryRepository::class);
 
 $router = new Router($container);
 $router->register([
