@@ -14,7 +14,7 @@ class Database
         if (self::$connection === null) {
             $host = Config::get('DB_HOST', 'localhost');
             $port = Config::get('DB_PORT', '5432');
-            $dbname = Config::get('DB_NAME', 'myapp');
+            $dbname = Config::get('DB_NAME', 'food_diary');
             $user = Config::get('DB_USER', 'postgres');
             $pass = Config::get('DB_PASS', '');
 
@@ -33,6 +33,7 @@ class Database
             } catch (PDOException $e) {
                 $msg = "Проблема с подключением к БД {$dbname}: " . $e->getMessage();
                 error_log($msg);
+
                 throw new \Exception($msg);
             }
         }
