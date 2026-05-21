@@ -8,8 +8,8 @@ use App\Core\DIContainer;
 use Psr\Log\LoggerInterface;
 
 //загрузка конфигурации
-Config::load(__DIR__ . '/Project/');
-
+//Config::load(__DIR__ . '/Project/');
+Config::load(__DIR__  . '/../');
 $logger = LoggerFactory::create();
 
 $container = new DIContainer();
