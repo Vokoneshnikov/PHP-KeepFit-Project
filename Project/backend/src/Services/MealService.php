@@ -24,15 +24,19 @@ class MealService
         }
         return $this->mealRepository->save($request);
     }
-    public function addFoodToLog(int $userId, int $foodId, float $weight, string $mealType): MealResponse
-    {
-        // Собираем DTO для репозитория
+    public function addFoodToLog(
+        int $userId,
+        int $foodId,
+        float $weight,
+        string $mealType,
+        ?string $date = null
+    ): MealResponse {
         $request = new CreateMealRequest(
-            $userId,
-            $foodId,
-            $weight,
-            MealType::from(strtolower($mealType)),
-            new \DateTimeImmutable(),
+            userId: $userId,
+            foodId: $foodId,
+            amountGrams: $weight,
+            mealType: MealType::from(strtolower($mealType)),
+            consumedAt: $this->createConsumedAt($date),
         );
 
         return $this->addMealRecord($request);
@@ -89,5 +93,19 @@ class MealService
             'fats' => $fats,
             'carbs' => $carbs,
         ];
+    }
+    private function createConsumedAt(?string $date): \DateTimeImmutable
+    {
+        if ($date === null || trim($date) === '') {
+            return new \DateTimeImmutable();
+        }
+
+        $consumedAt = \DateTimeImmutable::createFromFormat('!Y-m-d', $date);
+
+        if (!$consumedAt || $consumedAt->format('Y-m-d') !== $date) {
+            throw new \InvalidArgumentException('Некорректная дата. Используйте формат YYYY-MM-DD');
+        }
+
+        return $consumedAt;
     }
 }

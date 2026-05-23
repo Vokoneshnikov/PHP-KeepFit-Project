@@ -173,7 +173,8 @@ class FoodController extends BaseController
                 userId: (int)$userId,
                 foodId: (int)$foodId,
                 weight: (float)$body['weight'],
-                mealType: $body['mealType'] ?? 'Breakfast' // breakfast, lunch, dinner, snack
+                mealType: $body['mealType'] ?? 'Breakfast',
+                date: $body['date'] ?? null
             );
 
             return $this->json([

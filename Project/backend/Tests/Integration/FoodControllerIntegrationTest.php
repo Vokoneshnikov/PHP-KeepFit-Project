@@ -431,4 +431,68 @@ class FoodControllerIntegrationTest extends IntegrationTestCase
 
         $this->controller->addProduct($request, (string)$foodId);
     }
+    public function testAddFoodToMealLogUsesProvidedDate(): void
+    {
+        $this->pdo->exec("
+        INSERT INTO foods (name, calories, proteins, fats, carbs)
+        VALUES ('Овсянка', 68, 2.5, 1.5, 12)
+    ");
+
+        $foodId = (int)$this->pdo->lastInsertId();
+
+        $rawBody = json_encode([
+            'weight' => 200,
+            'mealType' => 'breakfast',
+            'date' => '2026-05-19',
+        ]);
+
+        $request = (new ServerRequest('POST', "/food/{$foodId}"))
+            ->withBody(Utils::streamFor($rawBody))
+            ->withAttribute('user_id', 1);
+
+        $response = $this->controller->addProduct($request, (string)$foodId);
+
+        $this->assertEquals(201, $response->getStatusCode());
+
+        $stmt = $this->pdo->query("
+        SELECT *
+        FROM meals
+        WHERE user_id = 1
+    ");
+
+        $meal = $stmt->fetch();
+
+        $this->assertNotFalse($meal);
+        $this->assertEquals(200, $meal['amount_grams']);
+        $this->assertEquals('breakfast', $meal['meal_type']);
+        $this->assertEquals('2026-05-19', $meal['consumed_at']);
+    }
+    public function testAddProductReturns400WhenDateIsInvalid(): void
+    {
+        $this->pdo->exec("
+        INSERT INTO foods (name, calories, proteins, fats, carbs)
+        VALUES ('Овсянка', 68, 2.5, 1.5, 12)
+    ");
+
+        $foodId = (int)$this->pdo->lastInsertId();
+
+        $request = (new ServerRequest('POST', "/food/{$foodId}"))
+            ->withBody(Utils::streamFor(json_encode([
+                'weight' => 200,
+                'mealType' => 'breakfast',
+                'date' => '19.05.2026',
+            ])))
+            ->withAttribute('user_id', 1);
+
+        $response = $this->controller->addProduct($request, (string)$foodId);
+
+        $this->assertEquals(400, $response->getStatusCode());
+
+        $responseBody = json_decode((string)$response->getBody(), true);
+
+        $this->assertEquals(
+            'Некорректная дата. Используйте формат YYYY-MM-DD',
+            $responseBody['error']
+        );
+    }
 }
