@@ -14,7 +14,8 @@ class FoodController extends BaseController
     public function __construct(
         private readonly FoodService $foodService,
         private readonly MealService $mealService
-    ) {}
+    ) {
+    }
 
     /**
      * GET /food
@@ -179,7 +180,6 @@ class FoodController extends BaseController
                 'message' => 'Продукт успешно добавлен в дневник питания',
                 'meal' => $mealItem
             ], 201);
-
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);
         }

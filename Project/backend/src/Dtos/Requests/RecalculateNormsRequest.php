@@ -3,6 +3,7 @@
 namespace App\Dtos\Requests;
 
 use App\Enums\FitnessGoal;
+
 class RecalculateNormsRequest
 {
     public function __construct(
@@ -11,5 +12,6 @@ class RecalculateNormsRequest
         public float $height,
         public float $activityLevel,
         public FitnessGoal $goal
-    ) {}
+    ) {
+    }
 }

@@ -13,7 +13,8 @@ class StatisticsService
     public function __construct(
         private readonly UserService $userService,
         private readonly StatisticsRepository $statisticsRepository
-    ) {}
+    ) {
+    }
 
     public function calculateAndSaveNorms(RecalculateNormsRequest $request): DailyNormsResponse
     {

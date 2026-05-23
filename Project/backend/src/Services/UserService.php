@@ -11,7 +11,8 @@ class UserService
 {
     public function __construct(
         private readonly IUserRepository $userRepository
-    ) {}
+    ) {
+    }
     public function getProfile(int $id): UserResponse
     {
         return $this->userRepository->getById($id);
@@ -98,5 +99,4 @@ class UserService
     {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($data));
     }
-
 }

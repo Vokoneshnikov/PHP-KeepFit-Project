@@ -9,7 +9,9 @@ use App\Dtos\Responses\FoodResponse;
 
 class FoodService
 {
-    public function __construct(private readonly IFoodRepository $foodRepository) {}
+    public function __construct(private readonly IFoodRepository $foodRepository)
+    {
+    }
 
     public function createFood(CreateFoodRequest $request): FoodResponse
     {

@@ -31,7 +31,6 @@ class DiaryController extends BaseController
             $diary = $this->diaryService->getDiaryForDate((int)$userId, $date);
 
             return $this->json($diary, 200);
-
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
         } catch (\Exception $e) {

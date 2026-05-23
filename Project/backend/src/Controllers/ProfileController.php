@@ -17,7 +17,8 @@ class ProfileController extends BaseController
     public function __construct(
         private readonly UserService $userService,
         private readonly StatisticsService $statisticsService
-    ) {}
+    ) {
+    }
 
     #[Route('/profile', ['GET'])]
     public function index(ServerRequestInterface $request): ResponseInterface
@@ -90,7 +91,6 @@ class ProfileController extends BaseController
 
             $updatedUser = $this->userService->updateProfile($dto);
             return $this->json($updatedUser, 200);
-
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
         } catch (\Exception $e) {
@@ -116,7 +116,6 @@ class ProfileController extends BaseController
                 'activityLevel' => $profileStatistics['parameters']['activityLevel'],
                 'goal' => $profileStatistics['parameters']['goal'],
             ], 200);
-
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);
         }
@@ -162,7 +161,6 @@ class ProfileController extends BaseController
                 'message' => 'Норма КБЖУ успешно пересчитана',
                 'norm' => $calculatedNorms
             ], 200);
-
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);
         }

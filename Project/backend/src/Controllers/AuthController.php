@@ -11,7 +11,9 @@ use App\Core\Route;
 
 class AuthController extends BaseController
 {
-    public function __construct(private readonly UserService $userService) {}
+    public function __construct(private readonly UserService $userService)
+    {
+    }
 
     #[Route('/api/register', ['POST'])]
     public function register(ServerRequestInterface $request): ResponseInterface
@@ -47,7 +49,6 @@ class AuthController extends BaseController
 
             $userResponse = $this->userService->register($dto);
             return $this->json($userResponse, 201);
-
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
         } catch (\Exception $e) {

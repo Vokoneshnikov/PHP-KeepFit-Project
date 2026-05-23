@@ -28,7 +28,6 @@ class FoodCustomController extends BaseController
             $foods = $this->foodService->getCustomFoods((int)$userId);
 
             return $this->json($foods, 200);
-
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);
         }
@@ -47,7 +46,6 @@ class FoodCustomController extends BaseController
             $food = $this->foodService->getCustomFoodById((int)$foodId, (int)$userId);
 
             return $this->json($food, 200);
-
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);
         }
@@ -88,7 +86,6 @@ class FoodCustomController extends BaseController
                 'message' => 'Пользовательский продукт успешно обновлен',
                 'food' => $updatedFood
             ], 200);
-
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
         } catch (\Exception $e) {
@@ -111,7 +108,6 @@ class FoodCustomController extends BaseController
             return $this->json([
                 'message' => 'Пользовательский продукт успешно удален'
             ], 200);
-
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);
         }

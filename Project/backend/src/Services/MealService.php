@@ -14,7 +14,8 @@ class MealService
     public function __construct(
         private readonly IMealRepository $mealRepository,
         private readonly IFoodRepository $foodRepository
-    ) {}
+    ) {
+    }
 
     public function addMealRecord(CreateMealRequest $request): MealResponse
     {
@@ -28,10 +29,10 @@ class MealService
         // Собираем DTO для репозитория
         $request = new CreateMealRequest(
             $userId,
-        $foodId,
-        $weight,
-        MealType::from(strtolower($mealType)),
-        new \DateTimeImmutable(),
+            $foodId,
+            $weight,
+            MealType::from(strtolower($mealType)),
+            new \DateTimeImmutable(),
         );
 
         return $this->addMealRecord($request);

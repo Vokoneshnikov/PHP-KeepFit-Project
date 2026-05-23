@@ -12,7 +12,8 @@ class MealController extends BaseController
     // Внедряем MealService для управления записями дневника
     public function __construct(
         private readonly MealService $mealService
-    ) {}
+    ) {
+    }
 
     /**
      * GET /meals/{mealId}
@@ -74,7 +75,6 @@ class MealController extends BaseController
                 'message' => 'Запись дневника успешно обновлена',
                 'meal' => $updatedMeal
             ], 200);
-
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
         } catch (\Exception $e) {
@@ -101,7 +101,6 @@ class MealController extends BaseController
             return $this->json([
                 'message' => 'Продукт успешно удален из дневника питания'
             ], 200);
-
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 400);
         } catch (\Exception $e) {

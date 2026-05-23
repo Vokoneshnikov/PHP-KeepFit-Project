@@ -4,11 +4,11 @@ namespace App\Repositories\Interfaces;
 
 interface IStatisticsRepository
 {
-    function saveDailyNorm(int $userId, int $calories, float $proteins, float $fats, float $carbs): void;
-    function saveUserParameters(int $userId, float $weight, int $height, string $activityLevel, string $goal): void;
-    function getWeeklyProgress(int $userId): array;
-    function getMonthlyProgress(int $userId): array;
-    function getAveragesAndNorms(int $userId, string $period = 'week'): array;
-    function getLatestUserParameters(int $userId): ?array;
-    function getLatestDailyNorm(int $userId): ?array;
+    public function saveDailyNorm(int $userId, int $calories, float $proteins, float $fats, float $carbs): void;
+    public function saveUserParameters(int $userId, float $weight, int $height, string $activityLevel, string $goal): void;
+    public function getWeeklyProgress(int $userId): array;
+    public function getMonthlyProgress(int $userId): array;
+    public function getAveragesAndNorms(int $userId, string $period = 'week'): array;
+    public function getLatestUserParameters(int $userId): ?array;
+    public function getLatestDailyNorm(int $userId): ?array;
 }

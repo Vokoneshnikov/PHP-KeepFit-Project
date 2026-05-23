@@ -10,5 +10,6 @@ class DailyNormsResponse
         public float $proteins,
         public float $fats,
         public float $carbs
-    ) {}
+    ) {
+    }
 }
