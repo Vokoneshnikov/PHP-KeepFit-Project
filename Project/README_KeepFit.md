@@ -10,7 +10,7 @@ KeepFit — семестровый проект по дисциплине **Full
 
 ### Backend
 
-- PHP 8.4
+- PHP 8.5
 - PostgreSQL 17
 - Composer
 - PSR-4 autoload
@@ -526,7 +526,7 @@ composer phpcs
 
 ### Архитектура
 
-- Используется PHP 8.4.
+- Используется PHP 8.5.
 - Соблюдена структура каталогов и неймспейсов.
 - Есть frontend-контроллер `Public/index.php`.
 - Реализован `Router`.
