@@ -26,14 +26,24 @@ class FoodService
         return $this->foodRepository->save($request);
     }
 
-    public function getDefaultFoods(): array
+    public function getDefaultFoods(int $userId): array
     {
-        return $this->foodRepository->getAll();
+        return $this->foodRepository->getAllVisibleForUser($userId);
     }
 
-    public function searchFoods(string $query): array
+    public function searchFoods(string $query, int $userId): array
     {
-        return $this->foodRepository->search($query);
+        return $this->foodRepository->search($query, $userId);
+    }
+
+    public function getVisibleProductById(int $id, int $userId): FoodResponse
+    {
+        return $this->foodRepository->getVisibleById($id, $userId);
+    }
+
+    public function getProductById(int $id): FoodResponse
+    {
+        return $this->foodRepository->getById($id);
     }
 
     public function getRecentFoods(int $userId): array
@@ -41,10 +51,6 @@ class FoodService
         return $this->foodRepository->getRecentByUserId($userId);
     }
 
-    public function getProductById(int $id): FoodResponse
-    {
-        return $this->foodRepository->getById($id);
-    }
     public function getCustomFoods(int $userId): array
     {
         return $this->foodRepository->getCustomByUserId($userId);

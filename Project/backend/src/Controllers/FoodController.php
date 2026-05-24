@@ -24,8 +24,15 @@ class FoodController extends BaseController
     #[Route('/food', ['GET'])]
     public function getSearchMainPage(ServerRequestInterface $request): ResponseInterface
     {
+        $userId = $request->getAttribute('user_id');
+
+        if (!$userId) {
+            return $this->error("Пользователь не авторизован", 401);
+        }
+
         try {
-            $defaultFoods = $this->foodService->getDefaultFoods();
+            $defaultFoods = $this->foodService->getDefaultFoods((int)$userId);
+
             return $this->json($defaultFoods, 200);
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);
@@ -39,6 +46,12 @@ class FoodController extends BaseController
     #[Route('/food/search', ['GET'])]
     public function getSearchResults(ServerRequestInterface $request): ResponseInterface
     {
+        $userId = $request->getAttribute('user_id');
+
+        if (!$userId) {
+            return $this->error("Пользователь не авторизован", 401);
+        }
+
         $query = $request->getQueryParams()['q'] ?? '';
 
         if (empty($query)) {
@@ -46,7 +59,8 @@ class FoodController extends BaseController
         }
 
         try {
-            $results = $this->foodService->searchFoods($query);
+            $results = $this->foodService->searchFoods($query, (int)$userId);
+
             return $this->json($results, 200);
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);
@@ -137,11 +151,15 @@ class FoodController extends BaseController
     #[Route('/food/{foodId}', ['GET'])]
     public function getProductPage(ServerRequestInterface $request, string $foodId): ResponseInterface
     {
+        $userId = $request->getAttribute('user_id');
+
+        if (!$userId) {
+            return $this->error("Пользователь не авторизован", 401);
+        }
+
         try {
-            $product = $this->foodService->getProductById((int)$foodId);
-            if (!$product) {
-                return $this->error("Продукт с ID {$foodId} не найден", 404);
-            }
+            $product = $this->foodService->getVisibleProductById((int)$foodId, (int)$userId);
+
             return $this->json($product, 200);
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);

@@ -22,18 +22,82 @@ class FoodRepository implements IFoodRepository
         $this->pdo = $pdo ?? Database::getConnection();
         $this->logger = $logger ?? LoggerFactory::create();
     }
-    public function search(string $query): array
+    public function getAllVisibleForUser(int $userId): array
     {
         try {
             $stmt = $this->pdo->prepare("
-                SELECT *
-                FROM foods
-                WHERE name LIKE :query
-                LIMIT 50
-            ");
+            SELECT *
+            FROM foods
+            WHERE created_by IS NULL OR created_by = :user_id
+            ORDER BY id ASC
+        ");
+
+            $stmt->execute([
+                'user_id' => $userId,
+            ]);
+
+            $data = $stmt->fetchAll();
+
+            return $this->mapRowsToResponses($data);
+        } catch (PDOException $e) {
+            $msg = 'Ошибка с запросом getAllVisibleForUser';
+
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage(),
+            ]);
+
+            throw new \Exception($msg);
+        }
+    }
+    public function getVisibleById(int $id, int $userId): FoodResponse
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+            SELECT *
+            FROM foods
+            WHERE id = :id
+              AND (created_by IS NULL OR created_by = :user_id)
+        ");
+
+            $stmt->execute([
+                'id' => $id,
+                'user_id' => $userId,
+            ]);
+
+            $data = $stmt->fetch();
+
+            if (!$data) {
+                throw new \Exception('Продукт не найден');
+            }
+
+            $model = $this->mapRowToModel($data);
+
+            return $this->mapModelToResponse($model);
+        } catch (PDOException $e) {
+            $msg = 'Ошибка с запросом getVisibleById';
+
+            $this->logger->error($msg, [
+                'exception' => $e->getMessage(),
+            ]);
+
+            throw new \Exception($msg);
+        }
+    }
+    public function search(string $query, int $userId): array
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+            SELECT *
+            FROM foods
+            WHERE LOWER(name) LIKE LOWER(:query)
+              AND (created_by IS NULL OR created_by = :user_id)
+            ORDER BY id ASC
+            LIMIT 50
+        ");
 
             $stmt->execute([
                 'query' => '%' . $query . '%',
+                'user_id' => $userId,
             ]);
 
             $data = $stmt->fetchAll();
@@ -54,17 +118,18 @@ class FoodRepository implements IFoodRepository
     {
         try {
             $stmt = $this->pdo->prepare("
-                SELECT f.*
-                FROM foods f
-                JOIN (
-                    SELECT food_id, MAX(id) AS last_meal_id
-                    FROM meals
-                    WHERE user_id = :user_id
-                    GROUP BY food_id
-                ) recent ON recent.food_id = f.id
-                ORDER BY recent.last_meal_id DESC
-                LIMIT 15
-            ");
+            SELECT f.*
+            FROM foods f
+            JOIN (
+                SELECT food_id, MAX(id) AS last_meal_id
+                FROM meals
+                WHERE user_id = :user_id
+                GROUP BY food_id
+            ) recent ON recent.food_id = f.id
+            WHERE f.created_by IS NULL OR f.created_by = :user_id
+            ORDER BY recent.last_meal_id DESC
+            LIMIT 15
+        ");
 
             $stmt->execute([
                 'user_id' => $userId,
