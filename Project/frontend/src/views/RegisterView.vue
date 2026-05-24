@@ -21,8 +21,8 @@ async function submitRegister() {
   loading.value = true
 
   try {
-    await authService.register(form.value)
-    router.push('/login')
+    await authService.registerAndLogin(form.value)
+    router.push('/profile')
   } catch (e) {
     error.value = e.response?.data?.error || 'Не удалось зарегистрироваться'
   } finally {

@@ -1,8 +1,12 @@
 {
     "name": "okoneshnikov/keepfit-project",
     "description": "This is my semester project for a Fullstack course",
+    "license": "proprietary",
     "type": "project",
     "require": {
+        "php": "^8.5",
+        "ext-pdo": "*",
+        "ext-pdo_pgsql": "*",
         "vlucas/phpdotenv": "^5.6",
         "monolog/monolog": "^3.10",
         "guzzlehttp/psr7": "^2.9",
@@ -17,6 +21,7 @@
         }
     },
     "require-dev": {
+        "ext-pdo_sqlite": "*",
         "squizlabs/php_codesniffer": "^4.0",
         "phpunit/phpunit": "^13.1"
     },

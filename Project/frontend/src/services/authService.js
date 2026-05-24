@@ -15,6 +15,14 @@ export const authService = {
     return response.data
   },
 
+  async registerAndLogin(payload) {
+    await this.register(payload)
+
+    return this.login({
+      email: payload.email,
+      password: payload.password,
+    })
+  },
   logout() {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
