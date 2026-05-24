@@ -38,6 +38,10 @@ const mealType = computed(() => {
   return route.query.mealType || 'other'
 })
 
+const selectedDate = computed(() => {
+  return route.query.date || new Date().toISOString().slice(0, 10)
+})
+
 const mealTypeLabel = computed(() => {
   const labels = {
     breakfast: 'Завтрак',
@@ -66,6 +70,7 @@ function selectFood(food) {
     },
     query: {
       mealType: mealType.value,
+      date: selectedDate.value,
     },
   })
 }

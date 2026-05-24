@@ -103,6 +103,7 @@ onMounted(loadDiary)
           :key="meal.type"
           :title="meal.title"
           :meal-type="meal.type"
+          :selected-date="selectedDate"
           :items="diary.meals?.[meal.type] ?? []"
         />
       </section>

@@ -11,6 +11,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  selectedDate: {
+    type: String,
+    default: () => new Date().toISOString().slice(0, 10),
+  },
   items: {
     type: Array,
     default: () => [],
@@ -25,6 +29,7 @@ function goToAddFood() {
     name: 'food-add',
     query: {
       mealType: props.mealType,
+      date: props.selectedDate,
     },
   })
 }

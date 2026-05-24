@@ -11,8 +11,16 @@ const grams = ref(100)
 const error = ref('')
 const loading = ref(false)
 
+function getToday() {
+  return new Date().toISOString().slice(0, 10)
+}
+
 const mealType = computed(() => {
   return route.query.mealType || 'other'
+})
+
+const selectedDate = computed(() => {
+  return route.query.date || getToday()
 })
 
 const mealTypeLabel = computed(() => {
@@ -73,9 +81,15 @@ async function addFood() {
     await foodService.addFoodToDiary(route.params.id, {
       weight: Number(grams.value),
       mealType: mealType.value,
+      date: selectedDate.value,
     })
 
-    router.push('/diary')
+    router.push({
+      name: 'diary',
+      query: {
+        date: selectedDate.value,
+      },
+    })
   } catch (e) {
     error.value = e.response?.data?.error || 'Не удалось добавить продукт'
   } finally {
@@ -112,6 +126,13 @@ onMounted(loadFood)
           Приём пищи:
           <span class="font-semibold text-green-700">
             {{ mealTypeLabel }}
+          </span>
+        </p>
+
+        <p class="mt-1 text-gray-500">
+          Дата:
+          <span class="font-semibold text-green-700">
+            {{ selectedDate }}
           </span>
         </p>
 
