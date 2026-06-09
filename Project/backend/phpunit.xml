@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+        bootstrap="vendor/autoload.php"
+        cacheDirectory=".phpunit.cache"
+        executionOrder="depends,defects"
+        requireCoverageMetadata="false"
+        beStrictAboutCoverageMetadata="false"
+        beStrictAboutOutputDuringTests="true"
+        failOnRisky="true"
+        failOnWarning="false"
+        colors="true"
+>
+    <testsuites>
+        <testsuite name="tests">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <source>
+        <include>
+            <directory suffix=".php">src/Controllers</directory>
+            <directory suffix=".php">src/Core</directory>
+            <directory suffix=".php">src/Middlewares</directory>
+            <directory suffix=".php">src/Repositories</directory>
+            <directory suffix=".php">src/Services</directory>
+        </include>
+
+        <exclude>
+            <directory suffix=".php">src/Dtos</directory>
+            <directory suffix=".php">src/Enums</directory>
+            <directory suffix=".php">src/Exceptions</directory>
+            <directory suffix=".php">src/Models</directory>
+        </exclude>
+    </source>
+</phpunit>
